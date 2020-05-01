@@ -1,0 +1,13 @@
+version: '3.7'
+
+services:
+### push-notifications ##################################
+  push-notifications:
+    image: node:10.20.1-buster
+    # On Linux, these lines ensure file ownership is set to your host user/group
+    user: "${MW_DOCKER_UID}:${MW_DOCKER_GID}"
+    volumes:
+      - ./:/srv/push-notifications
+    working_dir: /srv/push-notifications
+    tty: true
+    network_mode: host
