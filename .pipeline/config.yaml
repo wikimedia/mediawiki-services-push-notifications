@@ -1,0 +1,18 @@
+pipelines:
+  test:
+    blubberfile: blubber.yaml
+    stages:
+      - name: built
+        build: npm-run
+      - name: test
+        run:
+          image: '${built.imageID}'
+          arguments: [test]
+
+  publish:
+    blubberfile: blubber.yaml
+    stages:
+      - name: publish
+        build: production
+        publish:
+          image: true

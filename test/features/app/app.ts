@@ -80,3 +80,5 @@ describe('express app', function () {
         });
     });
 });
+
+export {};

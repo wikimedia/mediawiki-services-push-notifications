@@ -307,3 +307,5 @@ describe('Swagger spec', function () {
         });
     });
 });
+
+export {};

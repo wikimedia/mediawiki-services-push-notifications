@@ -21,10 +21,17 @@ npm install
 
 You are now ready to get to work!
 
-* Inspect/modify/configure `app.js`
-* Add routes by placing files in `routes/` (look at the files there for examples)
+* Inspect/modify/configure `src/app.ts`
+* Add routes by placing files in `src/routes/` (look at the files there for examples)
 
 You can also read [the documentation](https://www.mediawiki.org/wiki/ServiceTemplateNode).
+
+### Build the project
+Since this project is using TypeScript please run the build first before starting the service.
+
+```
+npm run build
+```
 
 ### Running the examples
 
@@ -51,10 +58,20 @@ routes you may query (with a browser, or `curl` and friends):
 * `http://localhost:6927/ex/err/manual/deny`
 * `http://localhost:6927/ex/err/auth`
 
+### Automatic rebuilds
+
+To automatically rebuild the project and restart the service when the source code changes you can run:
+
+```
+npm run watch
+```
+
+Note: this does not happen when a file in test/ changes.
+
 ### Tests
 
-The template also includes a test suite a small set of executable tests. To fire
-them up, simply run:
+The template also includes a small set of executable tests. To fire them up,
+simply run:
 
 ```
 npm test
@@ -72,12 +89,12 @@ npm run-script coverage
 ### Troubleshooting
 
 In a lot of cases when there is an issue with node it helps to recreate the
-`node_modules` directory:
+`node_modules` and `dist` directories:
 
 ```
-rm -r node_modules
+rm -r node_modules dist
 npm install
+npm run build
 ```
 
 Enjoy!
-

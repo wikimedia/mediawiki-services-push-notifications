@@ -62,10 +62,12 @@ describe('page gets', function () {
             uri: `${server.config.uri}en.wikipedia.org/v1/page/Foobar_and_friends`
         }).then((res) => {
             // if we are here, no error was thrown, not good
-            throw new Error('Expected an error to be thrown, got status: ', res.status);
+            throw new Error(`Expected an error to be thrown, got status: ${res.status}`);
         }, (err) => {
             // inspect the status
             assert.deepEqual(err.status, 404);
         });
     });
 });
+
+export {};

@@ -6,24 +6,35 @@ runs:
   environment: { APP_BASE_PATH: /srv/service }
 
 variants:
-  build:
+  all-dependencies:
     base: docker-registry.wikimedia.org/buster-nodejs10-devel
     copies: [local]
     apt: { packages: [git, build-essential, python-pkgconfig] }
     node: { requirements: [package.json] }
     runs: { environment: { LINK: g++ } }
+  build:
+    includes: [all-dependencies]
+    builder:
+      command: [npm, run, build]
+      requirements: [package.json, tsconfig.json, .eslintignore, .eslintrc.json, src/, scripts/]
   development:
     includes: [build]
     apt: { packages: [ca-certificates] }
-    entrypoint: [node, server.js]
-  test:
+    entrypoint: [node, dist/server.js]
+  npm-run:
     includes: [build]
     apt: { packages: [ca-certificates] }
-    entrypoint: [npm, test]
+    entrypoint: [npm, run-script]
   prep:
-    includes: [build]
-    node: { env: production }
+    includes: [all-dependencies]
+    copies:
+      - from: build
+        source: /srv/service/dist
+        destination: /srv/service/dist
+    node: { env: production}
   production:
+    base: docker-registry.wikimedia.org/buster-nodejs10-slim
+    node: {requirements: []}
+    includes: [prep]
     copies: [prep]
-    node: { env: production }
-    entrypoint: [node, server.js]
+    entrypoint: [node, dist/server.js]

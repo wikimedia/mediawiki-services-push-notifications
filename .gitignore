@@ -1,11 +1,12 @@
-Dockerfile
+/Dockerfile
 .idea/
 .vscode/
 
-coverage
+coverage/
 .nyc_output
-config.yaml
-node_modules
+/config.yaml
+/dist/
+node_modules/
 npm-debug.log
 package-lock.json
 
