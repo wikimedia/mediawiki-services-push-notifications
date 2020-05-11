@@ -7,12 +7,8 @@ const HTTPError = require('../lib/routing').HTTPError;
 
 // Swagger-ui-dist helpfully exporting the absolute path of its dist directory
 const docRoot = `${require('swagger-ui-dist').getAbsoluteFSPath()}/`;
-const DOC_CSP = "default-src 'none'; " +
-    "script-src 'self' 'unsafe-inline'; connect-src *; " +
-    "style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self';";
 
-function processRequest(app, req, res) {
-    const reqPath = req.query.path || '/index.html';
+function serve(appName, reqPath) {
     const filePath = path.join(docRoot, reqPath);
 
     // Disallow relative paths.
@@ -36,7 +32,7 @@ function processRequest(app, req, res) {
                 }
                 /* Adds the application's name in the header bar */
                 .topbar-wrapper .link::after {
-                    content: "${app.info.name}";
+                    content: "${appName}";
                 }
                 /* Removes input field and explore button from header bar */
                 .swagger-ui .topbar .download-url-wrapper {
@@ -56,7 +52,7 @@ function processRequest(app, req, res) {
                 .replace(/((?:src|href)=['"])/g, '$1?doc&path=')
                 // Some self-promotion
                 .replace(/<\/style>/, `${css}\n  </style>`)
-                .replace(/<title>[^<]*<\/title>/, `<title>${app.info.name}</title>`)
+                .replace(/<title>[^<]*<\/title>/, `<title>${appName}</title>`)
                 // Replace the default url with ours, switch off validation &
                 // limit the size of documents to apply syntax highlighting to
                 .replace(/dom_id: '#swagger-ui'/, 'dom_id: "#swagger-ui", ' +
@@ -84,19 +80,10 @@ function processRequest(app, req, res) {
                 .replace(/sourceMappingURL=/, 'sourceMappingURL=/?doc&path=');
         }
 
-        res.header('content-type', contentType);
-        res.header('content-security-policy', DOC_CSP);
-        res.header('x-content-security-policy', DOC_CSP);
-        res.header('x-webkit-csp', DOC_CSP);
-        res.send(body.toString());
-    })
-    .catch({ code: 'ENOENT' }, () => {
-        res.status(404)
-            .type('not_found')
-            .send('not found');
+        return { contentType, body };
     });
 }
 
 module.exports = {
-    processRequest
+    serve
 };
