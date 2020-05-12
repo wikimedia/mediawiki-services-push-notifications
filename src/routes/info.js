@@ -1,11 +1,11 @@
 'use strict';
 
-const sUtil = require('../lib/util');
+const routing = require('../lib/routing');
 
 /**
  * The main router object
  */
-const router = sUtil.router();
+const router = routing.router();
 
 /**
  * The main application object reported when this module is require()d

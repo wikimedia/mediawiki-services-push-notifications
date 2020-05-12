@@ -2,16 +2,16 @@
 
 const BBPromise = require('bluebird');
 const domino = require('domino');
-const sUtil = require('../lib/util');
+const routing = require('../lib/routing');
 const apiUtil = require('../lib/api-util');
 
 // shortcut
-const HTTPError = sUtil.HTTPError;
+const HTTPError = routing.HTTPError;
 
 /**
  * The main router object
  */
-const router = sUtil.router();
+const router = routing.router();
 
 /**
  * GET /siteinfo{/prop}

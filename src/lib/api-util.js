@@ -1,7 +1,7 @@
 'use strict';
 
 const BBPromise = require('bluebird');
-const sUtil = require('./util');
+const sUtil = require('./routing');
 const Template = require('swagger-router').Template;
 const HTTPError = sUtil.HTTPError;
 

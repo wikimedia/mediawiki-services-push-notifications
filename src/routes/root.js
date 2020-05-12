@@ -1,12 +1,12 @@
 'use strict';
 
-const sUtil = require('../lib/util');
+const routing = require('../lib/routing');
 const swaggerUi = require('../lib/swagger-ui');
 
 /**
  * The main router object
  */
-const router = sUtil.router();
+const router = routing.router();
 
 /**
  * The main application object reported when this module is require()d

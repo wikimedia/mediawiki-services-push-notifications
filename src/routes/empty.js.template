@@ -1,17 +1,15 @@
 'use strict';
 
-
 var BBPromise = require('bluebird');
-var sUtil = require('../lib/util');
+var routing = require('../lib/routing');
 
 // shortcut
-var HTTPError = sUtil.HTTPError;
-
+var HTTPError = routing.HTTPError;
 
 /**
  * The main router object
  */
-var router = sUtil.router();
+var router = routing.router();
 
 /**
  * The main application object reported when this module is require()d
@@ -23,7 +21,6 @@ var app;
 
 
 module.exports = function(appObj) {
-
     app = appObj;
 
     // the returned object mounts the routes on
@@ -33,6 +30,5 @@ module.exports = function(appObj) {
         api_version: X,  // must be a number!
         router: router
     };
-
 };
 

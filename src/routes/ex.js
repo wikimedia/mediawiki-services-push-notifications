@@ -1,16 +1,16 @@
 'use strict';
 
 const BBPromise = require('bluebird');
-const sUtil = require('../lib/util');
+const routing = require('../lib/routing');
 const fs = BBPromise.promisifyAll(require('fs'));
 
 // shortcut
-const HTTPError = sUtil.HTTPError;
+const HTTPError = routing.HTTPError;
 
 /**
  * The main router object
  */
-const router = sUtil.router();
+const router = routing.router();
 
 /*
  *  ERROR EXAMPLES
