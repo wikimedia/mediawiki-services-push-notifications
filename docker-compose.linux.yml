@@ -1,0 +1,9 @@
+version: '3.7'
+services:
+  push-notifications:
+    # On Linux, these lines ensure file ownership is set to your host user/group
+    user: "${MW_DOCKER_UID}:${MW_DOCKER_GID}"
+
+volumes:
+  esdata:
+    driver: local
