@@ -4,17 +4,17 @@ import * as routing from '../lib/routing';
 import BBPromise = require('bluebird');
 
 // shortcut
-var HTTPError = routing.HTTPError;
+const HTTPError = routing.HTTPError;
 
 /**
  * The main router object
  */
-var router = routing.router();
+const router = routing.router();
 
 /**
  * The main application object reported when this module is require()d
  */
-var app;
+let app;
 
 
 /** ROUTE DECLARATIONS GO HERE **/
