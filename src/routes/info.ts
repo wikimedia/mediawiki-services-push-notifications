@@ -69,3 +69,5 @@ module.exports = (appObj) => {
         router
     };
 };
+
+export {};

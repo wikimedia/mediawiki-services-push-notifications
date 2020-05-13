@@ -230,3 +230,5 @@ module.exports = (options) => {
         return app;
     }).then(createServer);
 };
+
+export {};

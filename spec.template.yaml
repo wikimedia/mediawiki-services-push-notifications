@@ -14,7 +14,7 @@ x-default-params:
   domain: en.wikipedia.org
 
 paths:
-  # from routes/root.js
+  # from routes/root.ts
   /robots.txt:
     get:
       tags:
@@ -72,7 +72,7 @@ paths:
               fooo: true
           response:
             status: 404
-  # from routes/v1.js
+  # from routes/v1.ts
   /{domain}/v1/siteinfo:
     get:
       tags:
@@ -249,7 +249,7 @@ paths:
             status: 200
             headers:
               content-type: text/html
-  # from routes/info.js
+  # from routes/info.ts
   /_info:
     get:
       tags:
@@ -320,7 +320,7 @@ paths:
           request: {}
           response:
             status: 301
-  # from routes/ex.js
+  # from routes/ex.ts
   /ex/err/array:
     get:
       tags:
