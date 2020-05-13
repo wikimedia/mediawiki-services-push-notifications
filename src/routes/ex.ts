@@ -1,7 +1,7 @@
 'use strict';
 
-const BBPromise = require('bluebird');
-const routing = require('../lib/routing');
+import * as routing from '../lib/routing';
+import BBPromise = require('bluebird');
 const fs = BBPromise.promisifyAll(require('fs'));
 
 // shortcut

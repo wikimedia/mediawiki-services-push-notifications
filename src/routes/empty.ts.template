@@ -1,7 +1,7 @@
 'use strict';
 
-var BBPromise = require('bluebird');
-var routing = require('../lib/routing');
+import * as routing from '../lib/routing';
+import BBPromise = require('bluebird');
 
 // shortcut
 var HTTPError = routing.HTTPError;

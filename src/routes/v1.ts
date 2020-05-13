@@ -1,8 +1,8 @@
 'use strict';
 
-const BBPromise = require('bluebird');
-const domino = require('domino');
-const routing = require('../lib/routing');
+import BBPromise = require('bluebird');
+import * as domino from 'domino';
+import * as routing from '../lib/routing';
 const apiUtil = require('../lib/api-util');
 
 // shortcut

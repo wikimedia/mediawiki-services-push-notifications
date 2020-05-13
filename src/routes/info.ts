@@ -1,6 +1,6 @@
 'use strict';
 
-const routing = require('../lib/routing');
+import * as routing from '../lib/routing';
 
 /**
  * The main router object

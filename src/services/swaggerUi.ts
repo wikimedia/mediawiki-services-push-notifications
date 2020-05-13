@@ -1,9 +1,9 @@
 'use strict';
 
-const BBPromise = require('bluebird');
+import * as path from 'path';
+import { HTTPError } from '../lib/routing';
+import BBPromise = require('bluebird');
 const fs = BBPromise.promisifyAll(require('fs'));
-const path = require('path');
-const HTTPError = require('../lib/routing').HTTPError;
 
 // Swagger-ui-dist helpfully exporting the absolute path of its dist directory
 const docRoot = `${require('swagger-ui-dist').getAbsoluteFSPath()}/`;
@@ -84,8 +84,6 @@ function serve(appName, reqPath) {
     });
 }
 
-module.exports = {
+export {
     serve
 };
-
-export {};

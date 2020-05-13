@@ -1,7 +1,7 @@
 'use strict';
 
-const routing = require('../lib/routing');
-const swaggerUi = require('../services/swaggerUi');
+import * as routing from '../lib/routing';
+import * as swaggerUi from '../services/swaggerUi';
 
 /**
  * The main router object
