@@ -1,7 +1,7 @@
 {
-  "name": "service-template-node",
-  "version": "0.7.0",
-  "description": "A blueprint for MediaWiki REST API services",
+  "name": "push-notifications",
+  "version": "0.0.1",
+  "description": "A service for sending push notification messages",
   "main": "./dist/app.js",
   "scripts": {
     "start": "npm run serve",
@@ -33,16 +33,18 @@
   "keywords": [
     "REST",
     "API",
-    "service template",
-    "MediaWiki"
+    "push",
+    "notification",
+    "FCM",
+    "APNs"
   ],
   "author": "Wikimedia Service Team <services@lists.wikimedia.org>",
   "contributors": [],
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://phabricator.wikimedia.org/tag/service-template-node/"
+    "url": "https://phabricator.wikimedia.org/tag/Push-Notification-Service/"
   },
-  "homepage": "https://github.com/wikimedia/service-template-node",
+  "homepage": "https://www.mediawiki.org/wiki/Wikimedia_Product_Infrastructure_team/Push_Notifications_Infrastructure",
   "dependencies": {
     "bluebird": "^3.5.5",
     "body-parser": "^1.19.0",
