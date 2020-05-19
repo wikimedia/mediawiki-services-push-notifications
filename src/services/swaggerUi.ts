@@ -23,7 +23,8 @@ function serve(appName, reqPath) {
     }
 
     return fs.readFileAsync(filePath)
-    .then((body) => {
+    .then((buffer) => {
+        let body: string = buffer.toString();
         if (reqPath === '/index.html') {
             const css = `
                 /* Removes Swagger's image from the header bar */
@@ -48,7 +49,7 @@ function serve(appName, reqPath) {
                     display: none
                 }
             `;
-            body = body.toString()
+            body = body
                 .replace(/((?:src|href)=['"])/g, '$1?doc&path=')
                 // Some self-promotion
                 .replace(/<\/style>/, `${css}\n  </style>`)
@@ -64,7 +65,7 @@ function serve(appName, reqPath) {
         let contentType = 'text/html';
         if (/\.js$/.test(reqPath)) {
             contentType = 'text/javascript';
-            body = body.toString()
+            body = body
                 .replace(/underscore-min\.map/, '?doc&path=lib/underscore-min.map')
                 .replace(/sourceMappingURL=/, 'sourceMappingURL=/?doc&path=');
         } else if (/\.png$/.test(reqPath)) {
@@ -75,7 +76,7 @@ function serve(appName, reqPath) {
             contentType = 'application/x-font-ttf';
         } else if (/\.css$/.test(reqPath)) {
             contentType = 'text/css';
-            body = body.toString()
+            body = body
                 .replace(/\.\.\/(images|fonts)\//g, '?doc&path=$1/')
                 .replace(/sourceMappingURL=/, 'sourceMappingURL=/?doc&path=');
         }
