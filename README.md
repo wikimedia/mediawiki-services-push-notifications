@@ -1,21 +1,21 @@
-# service-template-node [![Build Status](https://travis-ci.org/wikimedia/service-template-node.svg?branch=master)](https://travis-ci.org/wikimedia/service-template-node)
+# push-notifications
 
-Template for creating MediaWiki Services in Node.js
+A service for sending push notification messages to Firebase Cloud Messaging (FCM), and to more push notification vendors in the future.
 
 ## Getting Started
 
 ### Installation
 
-First, clone the repository
+First, clone the repository. Get the link from [Gerrit](https://gerrit.wikimedia.org/r/admin/projects/mediawiki/services/push-notifications) or use the one from [Github](https://github.com/wikimedia/mediawiki-services-push-notifications).
 
 ```shell script
-git clone https://github.com/wikimedia/service-template-node.git
+git clone git@github.com:wikimedia/mediawiki-services-push-notifications.git push-notifications-service
 ```
 
 Install the dependencies
 
 ```shell script
-cd service-template-node
+cd push-notifications
 npm install
 ```
 
