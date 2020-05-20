@@ -9,6 +9,7 @@
     "test"
   ],
   "watch": [
-    "config.yaml"
+    "config.yaml",
+    "spec.yaml"
   ]
 }
