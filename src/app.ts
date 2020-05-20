@@ -5,8 +5,7 @@ const BBPromise = require('bluebird');
 const express = require('express');
 const addShutdown = require('http-shutdown');
 const packageInfo = require('../package.json');
-import { loadConfig } from './loaders/config';
-import { setupExpress } from './loaders/express';
+import * as loaders from './loaders';
 import { loadRoutes } from './loaders/routes';
 
 /**
@@ -24,10 +23,7 @@ function initApp(options) {
     app.conf = options.config;      // this app's config options
     app.info = packageInfo;         // this app's package info
 
-    loadConfig(app, options);
-    setupExpress(app);
-
-    return BBPromise.resolve(app);
+    return loaders.init({ app, options });
 }
 
 /**
