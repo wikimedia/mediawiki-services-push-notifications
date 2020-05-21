@@ -16,7 +16,7 @@ variants:
     includes: [all-dependencies]
     builder:
       command: [npm, run, build]
-      requirements: [package.json, tsconfig.json, .eslintignore, .eslintrc.json, src/, scripts/]
+      requirements: [package.json, tsconfig.json, .eslintignore, .eslintrc.json, src/]
   development:
     includes: [build]
     apt: { packages: [ca-certificates] }

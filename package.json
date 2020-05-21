@@ -6,12 +6,11 @@
   "scripts": {
     "start": "npm run serve",
     "serve": "service-runner",
-    "build": "npm run build-ts && npm run lint-check && npm run copy-static-assets",
+    "build": "npm run build-ts && npm run lint-check",
     "build-ts": "tsc",
     "watch-ts": "tsc -w",
     "debug": "npm run build && npm run watch-debug",
     "clean": "rm -r dist",
-    "copy-static-assets": "ts-node scripts/copyStaticAssets.ts",
     "test": "PREQ_CONNECT_TIMEOUT=15 mocha -r ts-node/register test/**/*.ts",
     "coverage": "PREQ_CONNECT_TIMEOUT=15 nyc --reporter=lcov _mocha -r ts-node/register test/**/*.ts",
     "watch-test": "npm run test -- --watchAll",
@@ -85,7 +84,6 @@
     "nodemon": "^2.0.3",
     "nyc": "^14.1.1",
     "openapi-schema-validator": "^3.0.3",
-    "shelljs": "^0.8.4",
     "ts-node": "^8.10.1",
     "typescript": "^3.8.3"
   },

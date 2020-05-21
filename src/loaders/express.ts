@@ -1,7 +1,6 @@
 const BBPromise = require('bluebird');
 import * as bodyParser from 'body-parser';
 const compression = require('compression');
-const express = require('express');
 
 export function loadExpress(app) {
     // disable the X-Powered-By header
@@ -14,8 +13,6 @@ export function loadExpress(app) {
     app.use(bodyParser.json({ limit: app.conf.max_body_size || '100kb' }));
     // use the application/x-www-form-urlencoded parser
     app.use(bodyParser.urlencoded({ extended: true }));
-    // serve static files from static/
-    app.use('/static', express.static(`${__dirname}/../static`));
 
     // Return the express app
     return BBPromise.resolve(app);
