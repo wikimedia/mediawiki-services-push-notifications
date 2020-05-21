@@ -1,5 +1,3 @@
-'use strict';
-
 import * as path from 'path';
 import { HTTPError } from '../lib/routing';
 import BBPromise = require('bluebird');

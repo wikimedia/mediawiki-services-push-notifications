@@ -1,5 +1,3 @@
-'use strict';
-
 const BBPromise = require('bluebird');
 const sUtil = require('./routing');
 const Template = require('swagger-router').Template;

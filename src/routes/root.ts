@@ -1,5 +1,3 @@
-'use strict';
-
 import * as routing from '../lib/routing';
 import * as swaggerUi from '../services/swaggerUi';
 

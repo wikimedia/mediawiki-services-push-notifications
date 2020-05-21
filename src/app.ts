@@ -1,5 +1,3 @@
-'use strict';
-
 const http = require('http');
 const BBPromise = require('bluebird');
 const express = require('express');

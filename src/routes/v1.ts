@@ -1,5 +1,3 @@
-'use strict';
-
 import BBPromise = require('bluebird');
 import * as domino from 'domino';
 import * as routing from '../lib/routing';
