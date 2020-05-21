@@ -6,7 +6,6 @@ const express = require('express');
 const addShutdown = require('http-shutdown');
 const packageInfo = require('../package.json');
 import * as loaders from './loaders';
-import { loadRoutes } from './loaders/routes';
 
 /**
  * Creates an express app and initialises it
@@ -67,13 +66,7 @@ function createServer(app) {
  * @return {BBPromise} HTTP server
  */
 module.exports = (options) => {
-    return initApp(options)
-    .then((app) => loadRoutes(app, `${__dirname}/routes`))
-    .then((app) => {
-        // serve static files from static/
-        app.use('/static', express.static(`${__dirname}/static`));
-        return app;
-    }).then(createServer);
+    return initApp(options).then(createServer);
 };
 
 export {};
