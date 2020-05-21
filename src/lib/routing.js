@@ -126,6 +126,7 @@ function wrapRouteHandlers(route, app) {
  * @param {!Application} app the application object to add the handler to
  */
 function setErrorHandler(app) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     app.use((err, req, res, next) => {
         let errObj;
         // ensure this is an HTTPError object

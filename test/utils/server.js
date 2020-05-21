@@ -29,7 +29,7 @@ class TestServiceTemplateNodeRunner extends TestRunner {
                 // save a copy
                 this._spec = res.body;
             })
-            .catch((err) => {
+            .catch(() => {
                 // this error will be detected later, so ignore it
                 this._spec = { paths: {}, 'x-default-params': {} };
             })

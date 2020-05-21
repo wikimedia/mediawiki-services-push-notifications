@@ -1,6 +1,6 @@
 const http = require('http');
 const BBPromise = require('bluebird');
-const express = require('express');
+import express from 'express';
 const addShutdown = require('http-shutdown');
 const packageInfo = require('../package.json');
 import * as loaders from './loaders';
@@ -12,7 +12,7 @@ import * as loaders from './loaders';
  */
 function initApp(options) {
     // the main application object
-    const app = express();
+    const app: express.Application = express();
 
     // get the options and make them available in the app
     app.logger = options.logger;    // the logging device
@@ -20,7 +20,7 @@ function initApp(options) {
     app.conf = options.config;      // this app's config options
     app.info = packageInfo;         // this app's package info
 
-    return loaders.init({ app, options });
+    return loaders.init(app);
 }
 
 /**
