@@ -1,5 +1,8 @@
 {
   "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/eslint-recommended",
+    "plugin:@typescript-eslint/recommended",
     "wikimedia/server",
     "wikimedia/node",
     "wikimedia/language/es2016"
@@ -30,6 +33,10 @@
     "prefer-const": "error",
     "no-underscore-dangle": "off",
     "array-bracket-spacing": "off",
-    "padded-blocks": ["error", "never"]
+    "padded-blocks": ["error", "never"],
+    "@typescript-eslint/no-var-requires": "off",
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/explicit-function-return-type": "off",
+    "@typescript-eslint/camelcase": "off"
   }
 }

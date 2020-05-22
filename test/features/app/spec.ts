@@ -260,7 +260,7 @@ describe('Swagger spec', function () {
                 after(() => server.stop());
 
                 constructTests(spec).forEach((testCase) => {
-                    it(testCase.title, function (done) {
+                    it(testCase.title, function () {
                         return preq(testCase.request)
                         .then((res) => {
                             assert.status(res, testCase.response.status);

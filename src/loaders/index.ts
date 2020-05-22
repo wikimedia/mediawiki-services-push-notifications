@@ -3,9 +3,9 @@ import { loadConfig } from './config';
 import { loadExpress } from './express';
 import { loadRoutes } from './routes';
 
-export function init({ app, options }) {
+export function init(app) {
     return BBPromise.try(() => {
-        return loadConfig(app, options);
+        return loadConfig(app);
     }).then(() => {
         return loadExpress(app);
     }).then(() => {

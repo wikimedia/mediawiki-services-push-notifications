@@ -121,7 +121,7 @@ router.get('/page/:title/lead', (req, res) => {
     });
 });
 
-module.exports = (appObj) => {
+module.exports = () => {
     return {
         path: '/',
         api_version: 1,

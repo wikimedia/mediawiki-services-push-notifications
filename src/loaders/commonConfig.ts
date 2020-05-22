@@ -7,9 +7,8 @@ const apiUtil = require('../lib/api-util');
 /**
  * Loads configuration of common Node service template items.
  * @param {Express} app Express application
- * @param {Object} options the options to initialise the app with
  */
-export function initCommonConfig(app, options) {
+export function initCommonConfig(app) {
     // ensure some sane defaults
     app.conf.port = app.conf.port || 8888;
     app.conf.interface = app.conf.interface || '0.0.0.0';
