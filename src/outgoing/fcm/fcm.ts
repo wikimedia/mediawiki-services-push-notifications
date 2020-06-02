@@ -13,6 +13,9 @@ export interface FcmMessage {
     data: {
         type: string;
     };
+    android: {
+        collapseKey: string;
+    };
 }
 
 async function send(logger: Logger, fcmMessage: FcmMessage) {
@@ -29,6 +32,9 @@ export async function sendMessage(logger: Logger, message: SingleDeviceMessage) 
         token: message.deviceToken,
         data: {
             type: message.messageType
+        },
+        android: {
+            collapseKey: message.messageType
         }
     });
 }

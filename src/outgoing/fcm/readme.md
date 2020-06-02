@@ -1,5 +1,14 @@
 # Firebase Cloud Messaging
 
+## Features
+
+### Android device target support only
+This only supports messages for Android devices. While FCM can handle sending messages to APNs and MPS, the code here assumes it is used for sending messages to Android clients only. Messages for iOS and web will be handled separately.
+
+### Collapsed by message type
+Messages are collapsed by message type. This means that while the target Android device is offline when multiple CheckEchoV1 message are sent to this device, only one of these same messages reaches the device.
+We currently support only one type, CheckEchoV1. FCM supports up to four collapse keys. So, we could add a few more in the future.
+
 ## Server setup
 
 ### Create a Firebase project
