@@ -18,9 +18,9 @@ export interface FcmMessage {
     };
 }
 
-async function send(logger: Logger, fcmMessage: FcmMessage) {
+async function send(logger: Logger, fcmMessage: FcmMessage, dryRun?: boolean) {
     return admin.messaging()
-        .send(fcmMessage)
+        .send(fcmMessage, dryRun)
         .then((messageId) => {
             logger.log('debug/fcm', `Successfully sent message: ${messageId}`);
             return messageId;
@@ -29,12 +29,13 @@ async function send(logger: Logger, fcmMessage: FcmMessage) {
 
 export async function sendMessage(logger: Logger, message: SingleDeviceMessage) {
     return send(logger, {
-        token: message.deviceToken,
-        data: {
-            type: message.messageType
-        },
-        android: {
-            collapseKey: message.messageType
-        }
-    });
+                token: message.deviceToken,
+                data: {
+                    type: message.messageType
+                },
+                android: {
+                    collapseKey: message.messageType
+                }
+            },
+            message.dryRun);
 }

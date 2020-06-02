@@ -9,6 +9,9 @@ This only supports messages for Android devices. While FCM can handle sending me
 Messages are collapsed by message type. This means that while the target Android device is offline when multiple CheckEchoV1 message are sent to this device, only one of these same messages reaches the device.
 We currently support only one type, CheckEchoV1. FCM supports up to four collapse keys. So, we could add a few more in the future.
 
+### DryRun support
+If the incoming message includes a property of `dryRun` with the value `true` then the message does not actually arrive on the target device. This feature is for testing this service.
+
 ## Server setup
 
 ### Create a Firebase project

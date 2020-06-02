@@ -6,6 +6,7 @@ export enum MessageType {
 /** Generic message, independent of push vendor */
 export class Message {
     messageType: MessageType
+    dryRun?: boolean;
 }
 
 /** Message for targeting a single device */
