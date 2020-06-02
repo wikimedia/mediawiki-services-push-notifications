@@ -77,3 +77,7 @@ services:
         query: '{{ default(request.query, {}) }}'
         headers: '{{request.headers}}'
         body: '{{request.body}}'
+      # Allow 1 request to the API per second per IP
+      # express_rate_limiter:
+      #   windowMs: 1000
+      #   max: 1

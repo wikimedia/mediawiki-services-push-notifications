@@ -1,6 +1,7 @@
 const BBPromise = require('bluebird');
 import * as bodyParser from 'body-parser';
 const compression = require('compression');
+const limiter = require('express-rate-limit');
 
 export function loadExpress(app) {
     // disable the X-Powered-By header
@@ -13,7 +14,10 @@ export function loadExpress(app) {
     app.use(bodyParser.json({ limit: app.conf.max_body_size || '100kb' }));
     // use the application/x-www-form-urlencoded parser
     app.use(bodyParser.urlencoded({ extended: true }));
-
+    // apply API rate limiting, if configured
+    if (app.conf.express_rate_limiter) {
+        app.use(limiter(app.conf.express_rate_limiter));
+    }
     // Return the express app
     return BBPromise.resolve(app);
 }
