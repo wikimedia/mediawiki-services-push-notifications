@@ -1,5 +1,5 @@
 import * as routing from '../lib/routing';
-import { SingleDeviceMessage } from '../outgoing/shared/Message';
+import { MultiDeviceMessage } from '../outgoing/shared/Message';
 import { sendMessage as sendFcmMessage } from '../outgoing/fcm/fcm';
 
 // shortcut
@@ -15,7 +15,7 @@ const router = routing.router();
  * Sends a push notification message to FCM.
  */
 router.post('/message/fcm', (req, res) => {
-    const message: SingleDeviceMessage = req.body;
+    const message: MultiDeviceMessage = req.body;
 
     return sendFcmMessage(req.logger, message)
     .then(() => {

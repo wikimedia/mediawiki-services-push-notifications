@@ -146,20 +146,20 @@ paths:
     post:
       tags:
       - Push notifications
-      summary: Send a push notification to FCM
+      summary: Send a push notification to one or more devices via FCM
       description: Sends a push notification request to Firebase Cloud Messaging.
       requestBody:
         content:
           application/json:
             schema:
               required:
-              - deviceToken
+              - deviceTokens
               - messageType
               properties:
-                deviceToken:
-                  type: string
-                  description: The token for the device which has been registered with FCM.
-                  example: __REPLACE_ME__
+                deviceTokens:
+                  type: array
+                  description: FCM device tokens identifying the device(s) to which to send the message.
+                  example: [ __REPLACE_ME__ ]
                 messageType:
                   type: string
                   description: The type of message to send to the push vendor.

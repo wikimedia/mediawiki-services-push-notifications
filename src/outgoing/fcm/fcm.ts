@@ -1,5 +1,5 @@
 import * as admin from 'firebase-admin';
-import { SingleDeviceMessage } from '../shared/Message';
+import { MultiDeviceMessage } from '../shared/Message';
 
 export function init() {
     if (!admin.apps.length) {
@@ -18,24 +18,25 @@ export interface FcmMessage {
     };
 }
 
-async function send(logger: Logger, fcmMessage: FcmMessage, dryRun?: boolean) {
+async function send(logger: Logger, fcmMessages: Array<FcmMessage>, dryRun?: boolean) {
     return admin.messaging()
-        .send(fcmMessage, dryRun)
-        .then((messageId) => {
-            logger.log('debug/fcm', `Successfully sent message: ${messageId}`);
-            return messageId;
+        .sendAll(fcmMessages, dryRun)
+        .then((response) => {
+            logger.log('debug/fcm', `Successfully sent ${response.successCount} messages; ` +
+                `${response.failureCount} messages failed`);
         });
 }
 
-export async function sendMessage(logger: Logger, message: SingleDeviceMessage) {
-    return send(logger, {
-                token: message.deviceToken,
-                data: {
-                    type: message.messageType
-                },
-                android: {
-                    collapseKey: message.messageType
-                }
+export async function sendMessage(logger: Logger, message: MultiDeviceMessage) {
+    return send(logger, message.deviceTokens.map((deviceToken) => {
+        return {
+            token: deviceToken,
+            data: {
+                type: message.messageType
             },
-            message.dryRun);
+            android: {
+                collapseKey: message.messageType
+            }
+        };
+    }), message.dryRun);
 }

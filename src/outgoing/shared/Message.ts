@@ -10,6 +10,6 @@ export class Message {
 }
 
 /** Message for targeting a single device */
-export class SingleDeviceMessage extends Message {
-    deviceToken: string;
+export class MultiDeviceMessage extends Message {
+    deviceTokens: Array<string>;
 }
