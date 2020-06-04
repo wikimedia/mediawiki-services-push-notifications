@@ -12,3 +12,5 @@ npm-debug.log
 .eslintcache
 docker_data/
 docker-compose.override.yml
+
+certs

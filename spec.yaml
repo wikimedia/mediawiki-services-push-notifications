@@ -197,6 +197,61 @@ paths:
                 $ref: '#/components/schemas/problem'
       x-monitor: false
 
+  /v1/message/apns:
+    post:
+      tags:
+      - Push notifications
+      summary: Send a push notification to APNS
+      description: Sends a push notification request to Apple Push Notification Service.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required:
+              - deviceToken
+              - messageType
+              properties:
+                deviceTokens:
+                  type: array
+                  description: APNS device tokens identifying the device(s) to which to send the message.
+                  example: [__REPLACE_ME__]
+                messageType:
+                  type: string
+                  description: The type of message to send to the push vendor.
+                  enum:
+                  - checkEchoV1
+                dryRun:
+                  type: boolean
+                  description: Set this property to true if the message should not reach the target device.
+                  example: false
+        required: true
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/success'
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/problem'
+        504:
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/problem'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/problem'
+      x-monitor: false
+
 components:
   schemas:
     success:
