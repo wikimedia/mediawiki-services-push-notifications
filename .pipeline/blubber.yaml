@@ -31,11 +31,14 @@ variants:
       - from: build
         source: /srv/service/dist
         destination: /srv/service/dist
-    node: { env: production}
+    node: { env: production }
   production:
     base: docker-registry.wikimedia.org/buster-nodejs10-slim
-    node: {requirements: []}
+    node: { requirements: [] }
     includes: [prep]
     apt: { packages: [ca-certificates] }
     copies: [prep]
     entrypoint: [node, dist/server.js]
+    runs:
+      environment:
+        GOOGLE_APPLICATION_CREDENTIALS: /etc/mediawiki-services-push-notifications/google-application-credentials.json
