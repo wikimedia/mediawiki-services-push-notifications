@@ -8,6 +8,7 @@ services:
     user: "${MW_DOCKER_UID}:${MW_DOCKER_GID}"
     volumes:
       - ./:/srv/push-notifications
+      - ./certs:/etc/mediawiki-services-push-notifications/certs
     working_dir: /srv/push-notifications
     tty: true
     network_mode: host
