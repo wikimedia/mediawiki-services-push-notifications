@@ -17,7 +17,10 @@ export function loadRoutes(app, dir) {
             const isDirectory = fs.statSync(resolvedPath).isDirectory();
             if (isDirectory) {
                 loadRoutes(app, resolvedPath);
-            } else if (/\.js$/.test(fname)) {
+            // support .ts files for the test suite execution and code coverage report
+            // note: only the ts route files are loaded and run (via ts-node) when running
+            // tests, and only the js files in dist/ are loaded when running the app
+            } else if (/\.(js|ts)$/.test(fname)) {
                 // import the route file
                 const route = require(`${dir}/${fname}`);
                 return route(app);

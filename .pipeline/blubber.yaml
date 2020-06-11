@@ -42,3 +42,18 @@ variants:
     runs:
       environment:
         GOOGLE_APPLICATION_CREDENTIALS: /etc/mediawiki-services-push-notifications/google-application-credentials.json
+  codehealth:
+    base: docker-registry.wikimedia.org/releng/java8-sonar-scanner:0.6.1
+    copies: [all-dependencies]
+    runs:
+      environment: { SONAR_API_KEY: "SONAR_API_KEY" }
+      insecurely: true
+    entrypoint:
+      - /bin/bash
+      - scripts/run_sonar.sh
+      - -Dsonar.host.url=https://sonarcloud.io
+      - -Dsonar.organization=wmftest
+      - -Dsonar.projectKey=mediawiki-services-push-notifications
+      - -Dsonar.projectName=mediawiki-services-push-notifications
+      - -Dsonar.analysis.allowCommentOnMaster=1
+      - -Dsonar.analysis.gerritProjectName=mediawiki/services/push-notifications

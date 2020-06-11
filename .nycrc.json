@@ -1,0 +1,14 @@
+{
+  "cache": false,
+  "extension": [
+    ".ts",
+    ".js"
+  ],
+  "exclude": [
+    "coverage/**",
+    "node_modules/**",
+    "**/*.d.ts",
+    "test/**/*"
+  ],
+  "all": true
+}
