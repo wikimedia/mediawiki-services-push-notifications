@@ -2,7 +2,6 @@ const BBPromise = require('bluebird');
 const fs = BBPromise.promisifyAll(require('fs'));
 const yaml = require('js-yaml');
 const sUtil = require('../lib/routing');
-const apiUtil = require('../lib/api-util');
 
 /**
  * Loads configuration of common Node service template items.
@@ -44,9 +43,6 @@ export function initCommonConfig(app) {
     app.conf.log_header_whitelist = new RegExp(`^(?:${app.conf.log_header_whitelist.map((item) => {
         return item.trim();
     }).join('|')})$`, 'i');
-
-    // set up the request templates for the APIs
-    apiUtil.setupApiTemplates(app);
 
     // set up the spec
     if (!app.conf.spec) {
