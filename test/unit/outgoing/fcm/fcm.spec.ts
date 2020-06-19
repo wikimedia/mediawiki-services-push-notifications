@@ -1,13 +1,16 @@
 import * as sinon from 'sinon';
 import nock from 'nock';
-const { createMultipartPayload } = require('../../../utils/fcm.ts');
 import * as MockCredential from '../../../mocks/credential';
 import Logger from '../../../mocks/logger';
 import * as admin from 'firebase-admin';
 import { sendMessage as fcmSendMessage } from '../../../../src/outgoing/fcm/fcm';
-import { MessageType, MultiDeviceMessage } from '../../../../src/outgoing/shared/Message';
+import {
+    MessageType,
+    MultiDeviceMessage,
+    PushProvider
+} from '../../../../src/outgoing/shared/Message';
 
-const logger: Logger = new Logger();
+const { createMultipartPayload } = require('../../../utils/fcm.ts');
 
 describe('unit:FCM', () => {
     let adminCredentialStub, scope;
@@ -36,12 +39,11 @@ describe('unit:FCM', () => {
     });
 
     it('fcmSendMessage', async () => {
-        const message: MultiDeviceMessage = {
-            messageType: MessageType.CheckEchoV1,
-            deviceTokens: ['TOKEN'],
-            dryRun: true
-        };
-
-        await fcmSendMessage(logger, message);
+        await fcmSendMessage(new Logger(), new MultiDeviceMessage(
+            new Set(['TOKEN']),
+            PushProvider.FCM,
+            MessageType.CheckEchoV1,
+            true
+        ));
     });
 });

@@ -56,7 +56,7 @@ function getOptions(conf): ProviderOptions {
  * @export
  * @param {*} conf App conf
  */
-export function init(conf) {
+export function init(conf: any): void {
     if (!apn) {
         if (conf.apns.mock) {
             apn = new MockProvider();
@@ -69,24 +69,24 @@ export function init(conf) {
 /**
  * Send notification to APNS
  * @export
- * @param {Logger} logger App logger instance
- * @param {SingleDeviceMessage} message Notification to be pushed to device
+ * @param {!Logger} logger
+ * @param {!MultiDeviceMessage} message Notification to be pushed to device
+ * @return {!Promise<Responses>}
  */
-export async function sendMessage(logger: Logger, message: MultiDeviceMessage) {
-    let result: Promise<Responses>;
-
-    if (!message.dryRun) {
-        const notification = new Notification();
-        notification.payload = { data: { type: message.messageType } };
-        notification.threadId = message.messageType;
-        result = apn.send(notification, message.deviceTokens);
-    } else {
-        const responses: Responses = {
+export async function sendMessage(logger: Logger, message: MultiDeviceMessage): Promise<Responses> {
+    if (message.dryRun) {
+        const message: Responses = {
             sent: [{ device: 'dryRun' }],
             failed: []
         };
-        result = new Promise((resolve) => resolve(responses));
+        logger.log('debug/apns', JSON.stringify(message));
+        return message;
     }
-
-    return result;
+    const notification = new Notification();
+    notification.payload = { data: { type: message.type } };
+    notification.threadId = message.type;
+    const response: Responses = await apn.send(notification, [...message.deviceTokens]);
+    logger.log('debug/apns', `Successfully sent ${(response.sent.length)} messages; ` +
+        `${response.failed.length} messages failed`);
+    return response;
 }

@@ -1,42 +1,31 @@
 import * as admin from 'firebase-admin';
 import { MultiDeviceMessage } from '../shared/Message';
 
-export function init(conf) {
+export function init(conf): void {
     if (!admin.apps.length) {
-        admin.initializeApp({ credential: admin.credential.applicationDefault(), httpAgent: conf.proxyAgent });
+        admin.initializeApp({
+            credential: admin.credential.applicationDefault(),
+            httpAgent: conf.proxyAgent
+        });
     }
 }
 
-/** Shape of message sent to FCM */
-export interface FcmMessage {
-    token: string;
-    data: {
-        type: string;
-    };
-    android: {
-        collapseKey: string;
-    };
+async function send(logger: Logger, message: admin.messaging.MulticastMessage, dryRun?: boolean):
+    Promise<void> {
+    const response: admin.messaging.BatchResponse = await admin.messaging()
+        .sendMulticast(message, dryRun);
+    logger.log('debug/fcm', `Successfully sent ${response.successCount} messages; ` +
+        `${response.failureCount} messages failed`);
 }
 
-async function send(logger: Logger, fcmMessages: Array<FcmMessage>, dryRun?: boolean) {
-    return admin.messaging()
-        .sendAll(fcmMessages, dryRun)
-        .then((response) => {
-            logger.log('debug/fcm', `Successfully sent ${response.successCount} messages; ` +
-                `${response.failureCount} messages failed`);
-        });
-}
-
-export async function sendMessage(logger: Logger, message: MultiDeviceMessage) {
-    return send(logger, message.deviceTokens.map((deviceToken) => {
-        return {
-            token: deviceToken,
+export async function sendMessage(logger: Logger, message: MultiDeviceMessage): Promise<void> {
+    return send(logger, {
+            tokens: [...message.deviceTokens],
             data: {
-                type: message.messageType
+                type: message.type
             },
             android: {
-                collapseKey: message.messageType
+                collapseKey: message.type
             }
-        };
-    }), message.dryRun);
+    }, message.dryRun);
 }

@@ -67,3 +67,9 @@ services:
       express_rate_limiter:
         windowMs: 1000
         max: 1
+      # Queueing options. If defined, requests will be enqueued according to the specified options
+      # rather than immediately sent.
+      # queueing:
+      #   flushTimeoutMs: 10000
+      #   maxSize: 250
+      #   verbose: true
