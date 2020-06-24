@@ -9,7 +9,7 @@ describe('lib:routing', () => {
             status: 418,
             type: 'test_error',
             detail: response
-        }
+        };
         const err = new HTTPError(response);
         assert.ok(err instanceof Error);
         assert.deepEqual(err.name, 'HTTPError');
