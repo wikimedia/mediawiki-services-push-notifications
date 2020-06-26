@@ -1,9 +1,9 @@
 import * as admin from 'firebase-admin';
 import { MultiDeviceMessage } from '../shared/Message';
 
-export function init() {
+export function init(conf) {
     if (!admin.apps.length) {
-        admin.initializeApp({ credential: admin.credential.applicationDefault() });
+        admin.initializeApp({ credential: admin.credential.applicationDefault(), httpAgent: conf.proxyAgent });
     }
 }
 

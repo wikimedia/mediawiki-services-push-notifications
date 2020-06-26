@@ -1,8 +1,12 @@
-import { Provider, ProviderOptions, Notification, Responses } from '@parse/node-apn';
-import { Provider as MockProvider } from '@parse/node-apn/mock';
+import { Provider, ProviderOptions, Notification, Responses } from 'apn';
+import { Provider as MockProvider } from 'apn/mock';
 import { MultiDeviceMessage } from '../shared/Message';
 
 let apn: Provider;
+
+interface ProviderOptionsProxy {
+    proxy?: any;
+}
 
 /**
  * Get the options to initialize APNS client
@@ -12,10 +16,20 @@ let apn: Provider;
  * @return {ProviderOptions}
  */
 function getOptions(conf): ProviderOptions {
-    let options: ProviderOptions = {};
+    let options: ProviderOptions & ProviderOptionsProxy = {};
 
     if (conf.apns.production) {
         options = { production: conf.apns.production };
+    }
+
+    if (conf.proxy) {
+        options = {
+            ...options,
+            proxy: {
+                host: conf.proxy.host,
+                port: conf.proxy.port
+            }
+        };
     }
 
     if (conf.apns.token) {

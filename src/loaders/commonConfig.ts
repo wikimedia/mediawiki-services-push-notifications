@@ -2,6 +2,7 @@ const BBPromise = require('bluebird');
 const fs = BBPromise.promisifyAll(require('fs'));
 const yaml = require('js-yaml');
 const sUtil = require('../lib/routing');
+const ProxyAgent = require('proxy-agent');
 
 /**
  * Loads configuration of common Node service template items.
@@ -20,17 +21,11 @@ export function initCommonConfig(app) {
     }
 
     // set outgoing proxy
-    if (app.conf.proxy) {
-        process.env.HTTP_PROXY = app.conf.proxy;
-        // if there is a list of domains which should
-        // not be proxied, set it
-        if (app.conf.no_proxy_list) {
-            if (Array.isArray(app.conf.no_proxy_list)) {
-                process.env.NO_PROXY = app.conf.no_proxy_list.join(',');
-            } else {
-                process.env.NO_PROXY = app.conf.no_proxy_list;
-            }
-        }
+    if (app.conf.proxy && app.conf.proxy.host) {
+        const proxyProtocol = app.conf.proxy.protocol || 'http';
+        let proxyUrl = app.conf.proxy.host;
+        proxyUrl += (app.conf.proxy.port ? `:${app.conf.proxy.port}` : '');
+        app.conf.proxyAgent = new ProxyAgent(`${proxyProtocol}://${proxyUrl}`);
     }
 
     // set up header whitelisting for logging

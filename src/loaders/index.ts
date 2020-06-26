@@ -11,7 +11,7 @@ export function init(app) {
     }).then(() => {
         return loadExpress(app);
     }).then(() => {
-        return fcmInit();
+        return fcmInit(app.conf);
     }).then(() => {
         return apnsInit(app.conf);
     }).then(() => {
