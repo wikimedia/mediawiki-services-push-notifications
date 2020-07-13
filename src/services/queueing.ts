@@ -20,11 +20,11 @@ import allSettled from 'promise.allsettled';
 
 allSettled.shim();
 
-// Max recipients per request according to FCM docs.
+// Max recipients per sendAll or sendMulticast request according to FCM docs.
 // We'll also use it for APNS, even though APNS does not specify any limit, because there appears to
 // be an issue with sending large numbers of tokens per request via node-apn.
 // https://github.com/node-apn/node-apn/issues/557
-export const MAX_BATCH_SIZE = 500;
+export const MAX_MULTICAST_RECIPIENTS = 500;
 
 /**
  * Adds an enqueued message to a batch for submission to a provider gateway. Messages are
@@ -37,8 +37,8 @@ export const MAX_BATCH_SIZE = 500;
  *    key to a new array containing a new MultiDeviceMessage constructed from the current
  *    SingleDeviceMessage.
  * 3) If the MultiDeviceMessage at the tail of the array for the batching key is full (i.e., has >=
- *    MAX_BATCH_SIZE tokens in its deviceTokens property), then append a new MultiDeviceMessage
- *    constructed from the current SingleDeviceMessage.
+ *    MAX_MULTICAST_RECIPIENTS tokens in its deviceTokens property), then append a new
+ *    MultiDeviceMessage constructed from the current SingleDeviceMessage.
  * 4) Otherwise, add the current message's deviceToken to the deviceTokens set for the
  *    MultiDeviceMessage at the tail of the batched message array.
  * N.B. This function returns void but updates the state of the batchedMessages object passed in
@@ -57,7 +57,8 @@ function addBatchableMessage(batchedMessages: any, message: SingleDeviceMessage)
         ) ];
         return;
     }
-    if (batchedMessages[key][batchedMessages[key].length - 1].deviceTokens.size >= MAX_BATCH_SIZE) {
+    if (batchedMessages[key][batchedMessages[key].length - 1].deviceTokens.size >=
+        MAX_MULTICAST_RECIPIENTS) {
         batchedMessages[key].push(new MultiDeviceMessage(
             new Set([ message.deviceToken ]),
             message.provider,

@@ -59,7 +59,7 @@ describe('unit:queueing', () => {
         it('respects max batch size', () => {
             const queuedMessages = [];
             const randomToken = () => Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 10);
-            for (let i = 0; i < queueing.MAX_BATCH_SIZE * 2; i++) {
+            for (let i = 0; i < queueing.MAX_MULTICAST_RECIPIENTS * 2; i++) {
                 queuedMessages.push(new SingleDeviceMessage(
                     randomToken(),
                     PushProvider.APNS,
@@ -70,7 +70,7 @@ describe('unit:queueing', () => {
             const batchedMessages = getBatchedMessages(queuedMessages);
             assert.deepStrictEqual(batchedMessages.length, 2);
             batchedMessages.forEach((message) => {
-               assert.deepStrictEqual(message.deviceTokens.size, queueing.MAX_BATCH_SIZE);
+               assert.deepStrictEqual(message.deviceTokens.size, queueing.MAX_MULTICAST_RECIPIENTS);
             });
         });
     });
