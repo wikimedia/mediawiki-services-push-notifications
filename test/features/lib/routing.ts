@@ -32,6 +32,7 @@ describe('uncaught errors are validate by setErrorHandler', () => {
 
     after((done) => {
         server.close();
+        done();
     });
 
     it('thrown Error', () => {

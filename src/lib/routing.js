@@ -215,6 +215,29 @@ function createRouter(opts) {
     return new express.Router(options);
 }
 
+function validateRequestObject(request, headers) {
+    if (request.constructor !== Object) {
+        request = { uri: request };
+    }
+    if (request.url) {
+        request.uri = request.url;
+        delete request.url;
+    }
+    if (!request.uri) {
+        return BBPromise.reject(new HTTPError({
+            status: 500,
+            type: 'internal_error',
+            title: 'No request to issue',
+            detail: 'No request has been specified'
+        }));
+    }
+    request.method = request.method || 'get';
+    request.headers = request.headers || {};
+    Object.assign(request.headers, headers);
+
+    return request;
+}
+
 /**
  * Adds logger to the request and logs it.
  * @param {!*} req request object
@@ -229,27 +252,11 @@ function initAndLogRequest(req, app) {
     });
     req.context = { reqId: req.headers['x-request-id'] };
     req.issueRequest = (request) => {
-        if (!(request.constructor === Object)) {
-            request = { uri: request };
-        }
-        if (request.url) {
-            request.uri = request.url;
-            delete request.url;
-        }
-        if (!request.uri) {
-            return BBPromise.reject(new HTTPError({
-                status: 500,
-                type: 'internal_error',
-                title: 'No request to issue',
-                detail: 'No request has been specified'
-            }));
-        }
-        request.method = request.method || 'get';
-        request.headers = request.headers || {};
-        Object.assign(request.headers, {
+        request = validateRequestObject(request, {
             'user-agent': app.conf.user_agent,
             'x-request-id': req.context.reqId
         });
+
         req.logger.log('trace/req', { msg: 'Outgoing request', out_request: request });
         return preq(request);
     };
@@ -261,5 +268,9 @@ module.exports = {
     initAndLogRequest,
     wrapRouteHandlers,
     setErrorHandler,
+    testing: {
+        validateRequestObject,
+        errForLog
+    },
     router: createRouter
 };
