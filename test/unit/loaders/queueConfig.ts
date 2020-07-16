@@ -11,7 +11,14 @@ describe('unit:config', () => {
     describe('initQueue', () => {
         const initQueue = queueConfig.__get__('initQueue');
         it('initializes queue', () => {
-            const queue = initQueue(logger, 'apns', 'checkEchoV1', {});
+            const queue = initQueue(logger, {});
+            assert.ok(queue instanceof Queue);
+            assert.deepEqual(queue.name, 'push');
+        });
+        it('initializes queue with options for random flush timeout', () => {
+            const queue = initQueue(logger,  {
+                flushTimeoutMs: 'random', flushTimeoutMin: 5, flushTimeoutMax: 10
+            });
             assert.ok(queue instanceof Queue);
             assert.deepEqual(queue.name, 'push');
         });
