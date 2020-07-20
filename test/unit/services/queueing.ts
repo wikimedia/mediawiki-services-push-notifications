@@ -16,13 +16,14 @@ describe('unit:queueing', () => {
         it('batches messages (same provider & dryRun status)', () => {
             const tokens = ['a', 'b', 'c'];
             const queuedMessages = tokens.map((token) => {
-                return new SingleDeviceMessage(token, PushProvider.APNS, MessageType.CheckEchoV1,
+                return new SingleDeviceMessage(token, PushProvider.APNS, MessageType.CheckEchoV1, {},
                     false);
             });
             assert.deepStrictEqual(getBatchedMessages(queuedMessages), [ new MultiDeviceMessage(
                 new Set(tokens),
                 PushProvider.APNS,
                 MessageType.CheckEchoV1,
+                {},
                 false
             ) ]);
         });
@@ -30,29 +31,30 @@ describe('unit:queueing', () => {
         it('deduplicates messages (same provider & dryRun status)', () => {
             const tokens = ['a', 'a', 'a'];
             const queuedMessages = tokens.map((token) => {
-                return new SingleDeviceMessage(token, PushProvider.APNS, MessageType.CheckEchoV1,
+                return new SingleDeviceMessage(token, PushProvider.APNS, MessageType.CheckEchoV1, {},
                     false);
             });
             assert.deepStrictEqual(getBatchedMessages(queuedMessages), [ new MultiDeviceMessage(
                 new Set(['a']),
                 PushProvider.APNS,
                 MessageType.CheckEchoV1,
+                {},
                 false
             ) ]);
         });
 
         it('batches messages (different provider & dryRun status)', () => {
             const queuedMessages = [
-                new SingleDeviceMessage('a', PushProvider.FCM, MessageType.CheckEchoV1, true),
-                new SingleDeviceMessage('a', PushProvider.FCM, MessageType.CheckEchoV1, false),
-                new SingleDeviceMessage('a', PushProvider.APNS, MessageType.CheckEchoV1, true),
-                new SingleDeviceMessage('a', PushProvider.APNS, MessageType.CheckEchoV1, false)
+                new SingleDeviceMessage('a', PushProvider.FCM, MessageType.CheckEchoV1, {}, true),
+                new SingleDeviceMessage('a', PushProvider.FCM, MessageType.CheckEchoV1, {}, false),
+                new SingleDeviceMessage('a', PushProvider.APNS, MessageType.CheckEchoV1, {}, true),
+                new SingleDeviceMessage('a', PushProvider.APNS, MessageType.CheckEchoV1, {}, false)
             ];
             assert.deepStrictEqual(getBatchedMessages(queuedMessages), [
-                new MultiDeviceMessage(new Set(['a']), PushProvider.FCM, MessageType.CheckEchoV1, true),
-                new MultiDeviceMessage(new Set(['a']), PushProvider.FCM, MessageType.CheckEchoV1, false),
-                new MultiDeviceMessage(new Set(['a']), PushProvider.APNS, MessageType.CheckEchoV1, true),
-                new MultiDeviceMessage(new Set(['a']), PushProvider.APNS, MessageType.CheckEchoV1, false)
+                new MultiDeviceMessage(new Set(['a']), PushProvider.FCM, MessageType.CheckEchoV1, {}, true),
+                new MultiDeviceMessage(new Set(['a']), PushProvider.FCM, MessageType.CheckEchoV1, {}, false),
+                new MultiDeviceMessage(new Set(['a']), PushProvider.APNS, MessageType.CheckEchoV1, {}, true),
+                new MultiDeviceMessage(new Set(['a']), PushProvider.APNS, MessageType.CheckEchoV1, {}, false)
             ]);
         });
 
@@ -64,6 +66,7 @@ describe('unit:queueing', () => {
                     randomToken(),
                     PushProvider.APNS,
                     MessageType.CheckEchoV1,
+                    {},
                     false
                 ));
             }
