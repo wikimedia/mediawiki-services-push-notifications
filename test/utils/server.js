@@ -52,4 +52,18 @@ class TestServiceTemplateNodeRunner extends TestRunner {
     }
 }
 
+/**
+ * Helper function for express app unit testing.
+ * Extracts the Express app object from a test server instance
+ * to allow access to a test object instantiated by service-runner.
+ */
+async function getTestingApp() {
+    const server = new TestServiceTemplateNodeRunner();
+    await server.start();
+    const app =  server._services[0][0]._events.request[0];
+    await server.stop();
+    return app;
+}
+
 module.exports = TestServiceTemplateNodeRunner;
+module.exports.getTestingApp = getTestingApp;
