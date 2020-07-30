@@ -4,7 +4,7 @@ const preq   = require('preq');
 const TestRunner = require('service-runner/test/TestServer');
 
 class TestServiceTemplateNodeRunner extends TestRunner {
-    constructor(configPath = `${__dirname}/../../config.yaml`) {
+    constructor(configPath = `${__dirname}/../../config.test.yaml`) {
         super(configPath);
         this._spec = null;
     }
