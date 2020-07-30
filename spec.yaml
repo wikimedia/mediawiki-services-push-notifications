@@ -220,6 +220,9 @@ paths:
                   description: The type of message to send to the push vendor.
                   enum:
                   - checkEchoV1
+                topic:
+                  type: string
+                  description: The APNS topic (app bundle ID) to send the notification to.
                 dryRun:
                   type: boolean
                   description: Set this property to true if the message should not reach the target device.

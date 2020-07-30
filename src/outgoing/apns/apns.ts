@@ -85,6 +85,7 @@ export async function sendMessage(logger: Logger, message: MultiDeviceMessage): 
     const notification = new Notification();
     notification.payload = { data: { type: message.type } };
     notification.threadId = message.type;
+    notification.topic = message.meta.topic;
     const response: Responses = await apn.send(notification, [...message.deviceTokens]);
     logger.log('debug/apns', `Successfully sent ${(response.sent.length)} messages; ` +
         `${response.failed.length} messages failed`);

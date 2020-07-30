@@ -43,6 +43,7 @@ describe('unit:FCM', () => {
             new Set(['TOKEN']),
             PushProvider.FCM,
             MessageType.CheckEchoV1,
+            {},
             true
         ));
     });

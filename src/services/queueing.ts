@@ -53,6 +53,7 @@ function addBatchableMessage(batchedMessages: any, message: SingleDeviceMessage)
             new Set([ message.deviceToken ]),
             message.provider,
             message.type,
+            message.meta,
             message.dryRun
         ) ];
         return;
@@ -63,6 +64,7 @@ function addBatchableMessage(batchedMessages: any, message: SingleDeviceMessage)
             new Set([ message.deviceToken ]),
             message.provider,
             message.type,
+            message.meta,
             message.dryRun
         ));
         return;
