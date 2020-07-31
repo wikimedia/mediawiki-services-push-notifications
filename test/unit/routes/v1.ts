@@ -25,12 +25,14 @@ describe('unit:route:v1:apns', () => {
             .send({
                 deviceTokens: deviceTokens,
                 messageType: MessageType.CheckEchoV1,
-                dryRun: false
+                dryRun: false,
+                topic: 'test'
             }).expect(200).end(() => {
                 const message = new MultiDeviceMessage(
                     deviceTokens,
                     PushProvider.APNS,
                     MessageType.CheckEchoV1,
+                    { topic: 'test' },
                     false
                 );
                 sinon.assert.calledOnce(stub);
@@ -60,12 +62,14 @@ describe('unit:route:v1:fcm', () => {
             .send({
                 deviceTokens: deviceTokens,
                 messageType: MessageType.CheckEchoV1,
-                dryRun: false
+                dryRun: false,
+                topic: 'test'
             }).expect(200).end(() => {
                 const message = new MultiDeviceMessage(
                     deviceTokens,
                     PushProvider.FCM,
                     MessageType.CheckEchoV1,
+                    {},
                     false
                 );
                 sinon.assert.calledOnce(stub);

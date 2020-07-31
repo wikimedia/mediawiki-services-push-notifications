@@ -11,7 +11,13 @@ umask 002
 
 set +x
 
+# check for conditional parameter SONAR_BRANCH_TARGET
+args=()
+if [ ! -z ${SONAR_BRANCH_TARGET+x} ]; then
+  args+=( "-Dsonar.branch.target=$SONAR_BRANCH_TARGET" )
+fi
+
 npm run coverage
 
 # Initialize analysis, send data to SonarQube
-/opt/sonar-scanner/bin/sonar-scanner -Dsonar.login="$SONAR_API_KEY" -Dsonar.branch.target="$ZUUL_BRANCH" -Dsonar.branch.name="${ZUUL_CHANGE}-${ZUUL_PATCHSET}" "$@"
+/opt/sonar-scanner/bin/sonar-scanner "${args[@]}" -Dsonar.login="$SONAR_API_KEY" -Dsonar.branch.name="${SONAR_BRANCH_NAME}" "$@"
