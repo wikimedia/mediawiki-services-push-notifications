@@ -73,6 +73,8 @@ services:
         headers:
           user-agent: '{{user-agent}}'
         body: '{{ default(request.query, {}) }}'
+      mw_subscription_manager_username: REPLACE_ME
+      mw_subscription_manager_password: REPLACE_ME
       # Allow 1 request to the API per second per IP
       # express_rate_limiter:
       #   windowMs: 1000
