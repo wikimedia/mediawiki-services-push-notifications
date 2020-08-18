@@ -11,6 +11,7 @@ import {
 } from '../../../../src/outgoing/shared/Message';
 
 const { createMultipartPayload } = require('../../../utils/fcm.ts');
+const makeMetrics = require('service-runner/lib/metrics');
 
 describe('unit:FCM', () => {
     let adminCredentialStub, scope;
@@ -39,7 +40,13 @@ describe('unit:FCM', () => {
     });
 
     it('fcmSendMessage', async () => {
-        await fcmSendMessage(new Logger(), new MultiDeviceMessage(
+        const logger = new Logger();
+        const metrics = sinon.spy(makeMetrics([{
+            type: 'prometheus',
+            port: 9000,
+            name: 'test'
+        }], logger));
+        await fcmSendMessage(logger, metrics, new MultiDeviceMessage(
             new Set(['TOKEN']),
             PushProvider.FCM,
             MessageType.CheckEchoV1,

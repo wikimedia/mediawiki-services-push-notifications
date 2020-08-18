@@ -9,10 +9,12 @@ import Logger from '../../../mocks/logger';
 import sinon from 'sinon';
 import { Client as MockClient } from 'apn/mock';
 
+const makeMetrics = require('service-runner/lib/metrics');
+
 const logger: Logger = new Logger();
 
 describe('unit:APNS', () => {
-    let sandbox;
+    let sandbox, metrics;
 
     before(() => {
         const conf = {
@@ -25,12 +27,20 @@ describe('unit:APNS', () => {
 
     beforeEach(() => {
         sandbox = sinon.createSandbox();
+        metrics = sandbox.spy(makeMetrics([{
+            type: 'prometheus',
+            port: 9000,
+            name: 'test'
+        }], logger));
     });
 
-    afterEach(() => sandbox.restore());
+    afterEach(() => {
+        sandbox.restore();
+        metrics.clients[0].client.register.clear();
+    });
 
     it('send APNS message', async () => {
-        const response = await sendMessage(logger, new MultiDeviceMessage(
+        const response = await sendMessage(logger, metrics, new MultiDeviceMessage(
             new Set(['TOKEN']),
             PushProvider.APNS,
             MessageType.CheckEchoV1,
@@ -43,7 +53,7 @@ describe('unit:APNS', () => {
     });
 
     it('dryRun send APNS message', async () => {
-        const response = await sendMessage(logger, new MultiDeviceMessage(
+        const response = await sendMessage(logger, metrics, new MultiDeviceMessage(
             new Set(['TOKEN']),
             PushProvider.APNS,
             MessageType.CheckEchoV1,
@@ -62,6 +72,7 @@ describe('unit:APNS', () => {
         const spy = sandbox.spy(MockClient.prototype, 'write');
         await sendMessage(
             logger,
+            metrics,
             new MultiDeviceMessage(
                 new Set(['TOKEN']),
                 PushProvider.APNS,
@@ -79,6 +90,7 @@ describe('unit:APNS', () => {
         const spy = sandbox.spy(MockClient.prototype, 'write');
         await sendMessage(
             logger,
+            metrics,
             new MultiDeviceMessage(
                 new Set(['TOKEN']),
                 PushProvider.APNS,

@@ -63,7 +63,7 @@
     "preq": "^0.5.9",
     "promise.allsettled": "^1.0.2",
     "proxy-agent": "^3.1.1",
-    "service-runner": "^2.7.1",
+    "service-runner": "git+https://github.com/wikimedia/service-runner.git#prometheus_metrics",
     "supertest": "^4.0.2",
     "swagger-router": "^0.7.4",
     "swagger-ui-dist": "^3.22.3",

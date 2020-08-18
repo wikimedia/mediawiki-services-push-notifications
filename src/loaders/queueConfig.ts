@@ -1,6 +1,8 @@
 import Queue from 'buffered-queue';
 import assert from 'assert';
 import { onQueueFlush } from '../services/queueing';
+import prometheusClient from 'prom-client';
+import { SingleDeviceMessage } from '../../src/outgoing/shared/Message';
 
 export const DEFAULT_FLUSH_TIMEOUT_MS = 10000; // 10 seconds
 export const DEFAULT_MAX_QUEUE_SIZE = 5000;
@@ -109,10 +111,11 @@ function getFlushTimeout(options: QueueOptions): number {
 /**
  * Initialize and return a queue for the provider and message type.
  * @param {!Logger} logger
+ * @param {!Metrics} metrics
  * @param {!QueueOptions} options
  * @return {!Queue}
  */
-export function initQueue(logger: Logger, options: QueueOptions): Queue {
+export function initQueue(logger: Logger, metrics: Metrics, options: QueueOptions): Queue {
     validateQueueingConfig(options);
     const flushTimeoutMs = getFlushTimeout(options) || DEFAULT_FLUSH_TIMEOUT_MS;
     const maxSize = options.maxSize || DEFAULT_MAX_QUEUE_SIZE;
@@ -121,8 +124,23 @@ export function initQueue(logger: Logger, options: QueueOptions): Queue {
         flushTimeout: flushTimeoutMs,
         verbose: options.verbose
     });
+
     queue.on('flush', async (data) => {
-        return onQueueFlush(logger, data);
+        const histogram = metrics.makeMetric({
+            type: 'Histogram',
+            name: 'NotificationQueueTime',
+            prometheus: {
+                name: 'push_notifications_notification_queue_time',
+                help: 'Time the notification spent in the queue',
+                buckets: prometheusClient.linearBuckets(0, flushTimeoutMs / 20, 20)
+            }
+        });
+
+        data.forEach((message: SingleDeviceMessage) => {
+            histogram.observe(Date.now() - message.enqueueTimestamp);
+        });
+
+        return onQueueFlush(logger, metrics, data);
     });
     logger.log('debug/queueing',
         `Initialized queue: max size: ${maxSize}, flush timeout (ms): ${flushTimeoutMs}`);

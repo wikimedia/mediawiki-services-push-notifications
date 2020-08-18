@@ -18,6 +18,7 @@ export class Message {
     type: MessageType;
     meta: MessageMeta;
     dryRun?: boolean;
+    enqueueTimestamp?: number;
 
     constructor(provider: PushProvider, type: MessageType, meta: MessageMeta, dryRun?: boolean) {
         this.provider = provider;
