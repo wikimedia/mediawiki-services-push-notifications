@@ -3,7 +3,7 @@ import assert from 'assert';
 import { onQueueFlush } from '../services/queueing';
 
 export const DEFAULT_FLUSH_TIMEOUT_MS = 10000; // 10 seconds
-export const DEFAULT_MAX_QUEUE_SIZE = 5000;
+export const DEFAULT_MAX_QUEUE_SIZE = Number.MAX_SAFE_INTEGER;
 
 class QueueOptions {
     flushTimeoutMs?: string | number;
