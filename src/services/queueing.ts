@@ -90,20 +90,33 @@ function getBatchedMessages(messages: Array<SingleDeviceMessage>): Array<MultiDe
 /**
  * Callback invoked when the message queue is flushed. Consolidates and sends the queued messages.
  * @param {!Logger} logger
+ * @param {!Metrics} metrics
  * @param {!Array<SingleDeviceMessage>} messages
  * @return {!Promise}
  */
-export async function onQueueFlush(logger: Logger, messages: Array<SingleDeviceMessage>):
+export async function onQueueFlush(logger: Logger,
+                                   metrics: Metrics,
+                                   messages: Array<SingleDeviceMessage>):
     Promise<void> {
     const batchedMessages = getBatchedMessages(messages);
+
+    metrics.makeMetric({
+        type: 'Gauge',
+        name: 'QueueSizeOnFlush',
+        prometheus: {
+            name: 'push_notifications_queue_size_on_flush',
+            help: 'Reported size of queue on flush'
+        }
+    }).set(messages.length);
+
     // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
     // @ts-ignore: method added by shim
     await Promise.allSettled(batchedMessages.map(async (message: MultiDeviceMessage) => {
         switch (message.provider) {
             case 'apns':
-                return sendApnsMessage(logger, message);
+                return sendApnsMessage(logger, metrics, message);
             case 'fcm':
-                return sendFcmMessage(logger, message);
+                return sendFcmMessage(logger, metrics, message);
             default:
                 throw new Error(`Found unknown provider ${message.provider}`);
         }
@@ -117,5 +130,8 @@ export async function onQueueFlush(logger: Logger, messages: Array<SingleDeviceM
  * @param {!MultiDeviceMessage} message
  */
 export function enqueueMessages(queue: Queue, message: MultiDeviceMessage): void {
-    message.toSingleDeviceMessages().forEach((msg) => queue.add(msg));
+    message.toSingleDeviceMessages().forEach((msg) => {
+        msg.enqueueTimestamp = Date.now();
+        queue.add(msg);
+    });
 }
