@@ -78,24 +78,7 @@ export function init(conf: any): void {
 export async function sendMessage(logger: Logger,
                                   metrics: Metrics,
                                   message: MultiDeviceMessage): Promise<Responses> {
-    if (message.dryRun) {
-        const message: Responses = {
-            sent: [{ device: 'dryRun' }],
-            failed: []
-        };
-        logger.log('debug/apns', JSON.stringify(message));
-        return message;
-    }
-
-    const transactionStart = Date.now();
-
-    const notification = new Notification();
-    notification.payload = { data: { type: message.type } };
-    notification.threadId = message.type;
-    notification.topic = message.meta.topic;
-    const response: Responses = await apn.send(notification, [...message.deviceTokens]);
-
-    metrics.makeMetric({
+    const transactionHistogramArgs = {
         type: 'Histogram',
         name: 'APNSTransactionHistogram',
         prometheus: {
@@ -103,7 +86,26 @@ export async function sendMessage(logger: Logger,
             help: 'Time spent on a transaction with the APNS service',
             buckets: prometheusClient.exponentialBuckets(0.005, 2, 15)
         }
-    }).observe(Date.now() - transactionStart);
+    };
+    const transactionStart = Date.now();
+
+    if (message.dryRun) {
+        const message: Responses = {
+            sent: [{ device: 'dryRun' }],
+            failed: []
+        };
+        logger.log('debug/apns', JSON.stringify(message));
+        metrics.makeMetric(transactionHistogramArgs).observe(Date.now() - transactionStart);
+        return message;
+    }
+
+    const notification = new Notification();
+    notification.payload = { data: { type: message.type } };
+    notification.threadId = message.type;
+    notification.topic = message.meta.topic;
+    const response: Responses = await apn.send(notification, [...message.deviceTokens]);
+
+    metrics.makeMetric(transactionHistogramArgs).observe(Date.now() - transactionStart);
 
     logger.log('debug/apns', `Successfully sent ${(response.sent.length)} messages; ` +
         `${response.failed.length} messages failed`);
