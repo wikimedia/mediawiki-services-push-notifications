@@ -1,5 +1,4 @@
 import { initCommonConfig } from './commonConfig';
-import { initQueue } from './queueConfig';
 
 /**
  * Loads the configuration.
@@ -9,6 +8,5 @@ import { initQueue } from './queueConfig';
  * @return {BBPromise} the promise resolving to the app object
  */
 export function loadConfig(app) {
-    app.queue = initQueue(app.logger, app.metrics, app.conf.queueing);
     return initCommonConfig(app);
 }

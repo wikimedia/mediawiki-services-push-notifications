@@ -9,14 +9,32 @@
  * notification provider and type.
  */
 import Queue from 'buffered-queue';
-
-import { MultiDeviceMessage, SingleDeviceMessage } from '../outgoing/shared/Message';
-import { sendMessage as sendApnsMessage } from '../outgoing/apns/apns';
-import { sendMessage as sendFcmMessage } from '../outgoing/fcm/fcm';
+import prometheusClient from 'prom-client';
+import { Responses } from 'apn';
+import {
+    getFailedTokens as getFcmFailedTokens,
+    getMulticastMessage,
+    sendMessage as sendFcmMessage
+} from '../outgoing/fcm/fcm';
+import {
+    getFailedTokens as getApnsFailedTokens,
+    sendMessage as sendApnsMessage
+} from '../outgoing/apns/apns';
+import * as admin from 'firebase-admin';
+import { MultiDeviceMessage, PushProvider, SingleDeviceMessage } from '../outgoing/shared/Message';
+import {
+    DEFAULT_FLUSH_TIMEOUT_MS,
+    DEFAULT_MAX_QUEUE_SIZE,
+    getFlushTimeout,
+    QueueOptions,
+    validateQueueingConfig
+} from '../loaders/queueConfig';
+import { sendSubscriptionDeleteRequest } from '../outgoing/shared/mwapi';
 
 // TODO: Drop the shim and use the native Promise.allSettled when we migrate to Node 12
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/allSettled
 import allSettled from 'promise.allsettled';
+import BatchResponse = admin.messaging.BatchResponse;
 
 allSettled.shim();
 
@@ -47,7 +65,9 @@ export const MAX_MULTICAST_RECIPIENTS = 500;
  * @param {!SingleDeviceMessage} message
  */
 function addBatchableMessage(batchedMessages: any, message: SingleDeviceMessage): void {
-    const key = `${message.provider}:${message.type}${message.dryRun ? ':dryRun' : ''}`;
+    const topic = message.meta && message.meta.topic || '';
+    const dryRun = message.dryRun ? 'dryRun' : '';
+    const key = `${message.provider}:${message.type}:${topic}:${dryRun}`;
     if (!batchedMessages[key]) {
         batchedMessages[key] = [ new MultiDeviceMessage(
             new Set([ message.deviceToken ]),
@@ -88,42 +108,6 @@ function getBatchedMessages(messages: Array<SingleDeviceMessage>): Array<MultiDe
 }
 
 /**
- * Callback invoked when the message queue is flushed. Consolidates and sends the queued messages.
- * @param {!Logger} logger
- * @param {!Metrics} metrics
- * @param {!Array<SingleDeviceMessage>} messages
- * @return {!Promise}
- */
-export async function onQueueFlush(logger: Logger,
-                                   metrics: Metrics,
-                                   messages: Array<SingleDeviceMessage>):
-    Promise<void> {
-    const batchedMessages = getBatchedMessages(messages);
-
-    metrics.makeMetric({
-        type: 'Gauge',
-        name: 'QueueSizeOnFlush',
-        prometheus: {
-            name: 'push_notifications_queue_size_on_flush',
-            help: 'Reported size of queue on flush'
-        }
-    }).set(messages.length);
-
-    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-    // @ts-ignore: method added by shim
-    await Promise.allSettled(batchedMessages.map(async (message: MultiDeviceMessage) => {
-        switch (message.provider) {
-            case 'apns':
-                return sendApnsMessage(logger, metrics, message);
-            case 'fcm':
-                return sendFcmMessage(logger, metrics, message);
-            default:
-                throw new Error(`Found unknown provider ${message.provider}`);
-        }
-    }));
-}
-
-/**
  * Enqueue messages for one or more device tokens. If a queue does not yet exist for the provider
  * and message type, a new queue is lazily initialized.
  * @param {!Queue} queue the app's message queue
@@ -134,4 +118,79 @@ export function enqueueMessages(queue: Queue, message: MultiDeviceMessage): void
         msg.enqueueTimestamp = Date.now();
         queue.add(msg);
     });
+}
+
+/**
+ * Initialize and return a queue for the provider and message type.
+ * @param {!Application} app
+ */
+export function init(app: any): Queue {
+    const options: QueueOptions = app.conf && app.conf.queueing || {};
+    const flushTimeoutMs = getFlushTimeout(options) || DEFAULT_FLUSH_TIMEOUT_MS;
+    const maxSize = options.maxSize || DEFAULT_MAX_QUEUE_SIZE;
+    const queue = new Queue('push', {
+        size: maxSize,
+        flushTimeout: flushTimeoutMs,
+        verbose: options.verbose
+    });
+
+    validateQueueingConfig(options);
+
+    queue.on('flush', async (messages) => {
+        const histogram = app.metrics.makeMetric({
+            type: 'Histogram',
+            name: 'NotificationQueueTime',
+            prometheus: {
+                name: 'push_notifications_notification_queue_time',
+                help: 'Time the notification spent in the queue',
+                buckets: prometheusClient.linearBuckets(0, flushTimeoutMs / 20, 20)
+            }
+        });
+
+        messages.forEach((message: SingleDeviceMessage) => {
+            histogram.observe(Date.now() - message.enqueueTimestamp);
+        });
+
+        app.metrics.makeMetric({
+            type: 'Gauge',
+            name: 'QueueSizeOnFlush',
+            prometheus: {
+                name: 'push_notifications_queue_size_on_flush',
+                help: 'Reported size of queue on flush'
+            }
+        }).set(messages.length);
+
+        const batchedMessages = getBatchedMessages(messages);
+
+        // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+        // @ts-ignore: method added by shim
+        return Promise.allSettled(batchedMessages.map(async (message: MultiDeviceMessage) => {
+            switch (message.provider) {
+                case PushProvider.FCM: {
+                    const multicastMessage = getMulticastMessage(message);
+                    const response: BatchResponse = await sendFcmMessage(app, multicastMessage,
+                        message.dryRun);
+                    const failedTokens = getFcmFailedTokens(multicastMessage, response);
+                    if (failedTokens.length) {
+                        return sendSubscriptionDeleteRequest(app, failedTokens);
+                    }
+                    return;
+                }
+                case PushProvider.APNS: {
+                    const response: Responses = await sendApnsMessage(app, message);
+                    const failedTokens = getApnsFailedTokens(response);
+                    if (failedTokens.length) {
+                        return sendSubscriptionDeleteRequest(app, failedTokens);
+                    }
+                    return;
+                }
+                default:
+                    throw new Error(`Found unknown provider ${message.provider}`);
+            }
+        }));
+    });
+
+    app.queue = queue;
+    app.logger.log('debug/queueing',
+        `Initialized queue: max size: ${maxSize}, flush timeout (ms): ${flushTimeoutMs}`);
 }

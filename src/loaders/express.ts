@@ -1,4 +1,3 @@
-const BBPromise = require('bluebird');
 import * as bodyParser from 'body-parser';
 const compression = require('compression');
 const limiter = require('express-rate-limit');
@@ -18,6 +17,4 @@ export function loadExpress(app) {
     if (app.conf.express_rate_limiter) {
         app.use(limiter(app.conf.express_rate_limiter));
     }
-    // Return the express app
-    return BBPromise.resolve(app);
 }

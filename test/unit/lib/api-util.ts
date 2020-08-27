@@ -1,23 +1,19 @@
 import assert from 'assert';
 import nock from 'nock';
-import preq from 'preq';
 import * as api from '../../../src/lib/api-util';
 
 describe('api-util', () => {
-    const req = {
-        app: { conf: {} },
-        headers: {},
-        params: { domain: 'mock.wikipedia.org' },
-        issueRequest: (request) => preq(request)
+    const app = {
+        conf: {}
     };
 
     before(() => {
-        api.setupApiTemplates(req.app);
+        api.setupApiTemplates(app);
     });
 
     describe('mwApiGettoken', () => {
         it('gets token', async () => {
-            const scope = nock('http://mock.wikipedia.org')
+            const scope = nock('https://meta.wikimedia.org')
                 .post('/w/api.php')
                 .reply(200, {
                     batchcomplete: '',
@@ -28,7 +24,7 @@ describe('api-util', () => {
                     }
                 });
 
-            await api.mwApiGetToken(req).then((token) => {
+            await api.mwApiGetToken(app).then((token) => {
                 assert.deepStrictEqual(token, 'TOKEN+\\');
             });
 
@@ -36,11 +32,11 @@ describe('api-util', () => {
         });
 
         it('throws on token request failure', async () => {
-            const scope = nock('http://mock.wikipedia.org')
+            const scope = nock('https://meta.wikimedia.org')
                 .post('/w/api.php')
                 .reply(500);
 
-            await api.mwApiGetToken(req).then(() => {
+            await api.mwApiGetToken(app).then(() => {
                 assert.fail('Should throw on error response from API');
             }).catch((err) => {
                 assert.deepStrictEqual(err.status, 500);
@@ -52,7 +48,7 @@ describe('api-util', () => {
 
     describe('mwApiLogin', () => {
         it('logs in if correctly configured', async () => {
-            const scope = nock('http://mock.wikipedia.org')
+            const scope = nock('https://meta.wikimedia.org')
                 .post('/w/api.php')
                 .reply(200, {
                     batchcomplete: '',
@@ -70,12 +66,12 @@ describe('api-util', () => {
                     }
                 });
 
-            req.app.conf = {
+            app.conf = {
                 mw_subscription_manager_username: 'Test user',
                 mw_subscription_manager_password: 'Test pass'
             };
 
-            await api.mwApiLogin(req).then((rsp) => {
+            await api.mwApiLogin(app).then((rsp) => {
                 assert.deepStrictEqual(rsp.status, 200);
             });
 
@@ -83,10 +79,10 @@ describe('api-util', () => {
         });
 
         it('throws if username and password are not configured', async () => {
-            req.app.conf = {};
+            app.conf = {};
             // Note: Error will not be caught and handled in BBPromise.catch();
             try {
-                await api.mwApiLogin(req).then(() => {
+                await api.mwApiLogin(app).then(() => {
                     assert.fail('Should throw if username and password are not configured');
                 });
             } catch (err) {
@@ -94,4 +90,6 @@ describe('api-util', () => {
             }
         });
     });
+
+    after(() => nock.cleanAll());
 });

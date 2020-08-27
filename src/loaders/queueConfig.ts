@@ -1,13 +1,9 @@
-import Queue from 'buffered-queue';
 import assert from 'assert';
-import { onQueueFlush } from '../services/queueing';
-import prometheusClient from 'prom-client';
-import { SingleDeviceMessage } from '../../src/outgoing/shared/Message';
 
 export const DEFAULT_FLUSH_TIMEOUT_MS = 10000; // 10 seconds
 export const DEFAULT_MAX_QUEUE_SIZE = Number.MAX_SAFE_INTEGER;
 
-class QueueOptions {
+export class QueueOptions {
     flushTimeoutMs?: string | number;
     flushTimeoutMin?: number;
     flushTimeoutMax?: number;
@@ -66,7 +62,7 @@ function validateFlushTimeout(options: QueueOptions): void {
  * @param {?QueueOptions} options
  * @throws AssertionError
  */
-function validateQueueingConfig(options: QueueOptions = null): void {
+export function validateQueueingConfig(options: QueueOptions = null): void {
     if (!options) {
         return;
     }
@@ -99,50 +95,11 @@ function getRandomFlushTimeout(options: QueueOptions): number {
  * @param {!QueueOptions} options
  * @return {!number}
  */
-function getFlushTimeout(options: QueueOptions): number {
+export function getFlushTimeout(options: QueueOptions): number {
     if (options.flushTimeoutMs === 'random') {
         return getRandomFlushTimeout(options);
     }
     // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
     // @ts-ignore: flushTimeoutMs is either a number or 'random'
     return options.flushTimeoutMs;
-}
-
-/**
- * Initialize and return a queue for the provider and message type.
- * @param {!Logger} logger
- * @param {!Metrics} metrics
- * @param {!QueueOptions} options
- * @return {!Queue}
- */
-export function initQueue(logger: Logger, metrics: Metrics, options: QueueOptions): Queue {
-    validateQueueingConfig(options);
-    const flushTimeoutMs = getFlushTimeout(options) || DEFAULT_FLUSH_TIMEOUT_MS;
-    const maxSize = options.maxSize || DEFAULT_MAX_QUEUE_SIZE;
-    const queue = new Queue('push', {
-        size: maxSize,
-        flushTimeout: flushTimeoutMs,
-        verbose: options.verbose
-    });
-
-    queue.on('flush', async (data) => {
-        const histogram = metrics.makeMetric({
-            type: 'Histogram',
-            name: 'NotificationQueueTime',
-            prometheus: {
-                name: 'push_notifications_notification_queue_time',
-                help: 'Time the notification spent in the queue',
-                buckets: prometheusClient.linearBuckets(0, flushTimeoutMs / 20, 20)
-            }
-        });
-
-        data.forEach((message: SingleDeviceMessage) => {
-            histogram.observe(Date.now() - message.enqueueTimestamp);
-        });
-
-        return onQueueFlush(logger, metrics, data);
-    });
-    logger.log('debug/queueing',
-        `Initialized queue: max size: ${maxSize}, flush timeout (ms): ${flushTimeoutMs}`);
-    return queue;
 }

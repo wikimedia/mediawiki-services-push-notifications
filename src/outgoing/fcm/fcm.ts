@@ -1,26 +1,28 @@
 import * as admin from 'firebase-admin';
 import prometheusClient from 'prom-client';
 import { MultiDeviceMessage } from '../shared/Message';
+import MulticastMessage = admin.messaging.MulticastMessage;
+import BatchResponse = admin.messaging.BatchResponse;
+import { Application } from 'express';
 
-export function init(conf): void {
+export function init(app: Application): void {
     if (!admin.apps.length) {
         admin.initializeApp({
             credential: admin.credential.applicationDefault(),
-            httpAgent: conf.proxyAgent
+            httpAgent: app.conf && app.conf.proxyAgent
         });
     }
 }
 
-async function send(logger: Logger,
-                    metrics: Metrics,
-                    message: admin.messaging.MulticastMessage,
-                    dryRun?: boolean):
-    Promise<void> {
+export async function sendMessage(app: Application, message: MulticastMessage, dryRun?: boolean):
+    Promise<BatchResponse> {
     const transactionStart = Date.now();
-    const response: admin.messaging.BatchResponse = await admin.messaging()
-        .sendMulticast(message, dryRun);
+    const response: BatchResponse = await admin.messaging().sendMulticast(message, dryRun);
 
-    metrics.makeMetric({
+    app.logger.log('debug/fcm', `Successfully sent ${response.successCount} messages; ` +
+        `${response.failureCount} messages failed`);
+
+    app.metrics.makeMetric({
         type: 'Histogram',
         name: 'FCMTransactionTiming',
         prometheus: {
@@ -30,42 +32,53 @@ async function send(logger: Logger,
         }
     }).observe(Date.now() - transactionStart);
 
-    logger.log('debug/fcm', `Successfully sent ${response.successCount} messages; ` +
-        `${response.failureCount} messages failed`);
-
-    metrics.makeMetric({
+    let successCount = response.successCount;
+    if (successCount === null || successCount === undefined) {
+        successCount = 0;
+    }
+    app.metrics.makeMetric({
         type: 'Counter',
         name: 'FCMSendSuccess',
         prometheus: {
             name: 'push_notifications_fcm_send_success',
             help: 'Count of successful FCM notifications sent'
         }
-    }).increment(
-        response.successCount === null || response.successCount === undefined ? 0 : response.successCount
-    );
+    }).increment(successCount);
 
-    metrics.makeMetric({
+    let failureCount = response.failureCount;
+    if (failureCount === null || failureCount === undefined) {
+        failureCount = 0;
+    }
+    app.metrics.makeMetric({
         type: 'Counter',
         name: 'FCMSendFailure',
         prometheus: {
             name: 'push_notifications_fcm_send_failure',
             help: 'Count of failed FCM notifications sent'
         }
-    }).increment(
-        response.failureCount === null || response.failureCount === undefined ? 0 : response.failureCount
-    );
+    }).increment(failureCount);
+
+    return response;
 }
 
-export async function sendMessage(logger: Logger,
-                                  metrics: Metrics,
-                                  message: MultiDeviceMessage): Promise<void> {
-    return send(logger, metrics, {
-            tokens: [...message.deviceTokens],
-            data: {
-                type: message.type
-            },
-            android: {
-                collapseKey: message.type
-            }
-    }, message.dryRun);
+export function getMulticastMessage(message: MultiDeviceMessage): MulticastMessage {
+    return {
+        tokens: [...message.deviceTokens],
+        data: {
+            type: message.type
+        },
+        android: {
+            collapseKey: message.type
+        }
+    };
+}
+
+export function getFailedTokens(message: MulticastMessage, response: BatchResponse): string[] {
+    const failedTokens = [];
+    response.responses.forEach((rsp, idx) => {
+        if (!rsp.success) {
+            failedTokens.push(message.tokens[idx]);
+        }
+    });
+    return failedTokens;
 }

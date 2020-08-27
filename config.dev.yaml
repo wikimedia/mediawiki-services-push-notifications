@@ -69,7 +69,7 @@ services:
       # the template used for contacting the MW API
       mwapi_req:
         method: post
-        uri: https://{{domain}}/w/api.php
+        uri: https://meta.wikipedia.org/w/api.php
         headers:
           user-agent: '{{user-agent}}'
         body: '{{ default(request.query, {}) }}'

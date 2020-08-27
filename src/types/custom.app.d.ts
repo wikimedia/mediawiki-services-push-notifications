@@ -2,7 +2,7 @@ declare namespace Express {
     export interface Application {
         logger: Logger;
         metrics: any;
-        conf: object;
+        conf: any;
         info: object;
     }
 }

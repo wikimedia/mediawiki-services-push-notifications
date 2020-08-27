@@ -2,6 +2,7 @@ import { Provider, ProviderOptions, Notification, Responses } from 'apn';
 import { Provider as MockProvider } from 'apn/mock';
 import { MultiDeviceMessage } from '../shared/Message';
 import prometheusClient from 'prom-client';
+import { Application } from 'express';
 
 let apn: Provider;
 
@@ -55,29 +56,26 @@ function getOptions(conf): ProviderOptions {
 /**
  * Initialize APNS client. Uses mock if configured accordingly.
  * @export
- * @param {*} conf App conf
+ * @param {!Application} app Express app
  */
-export function init(conf: any): void {
+export function init(app: Application): void {
     if (!apn) {
-        if (conf.apns.mock) {
+        if (app.conf.apns.mock) {
             apn = new MockProvider();
         } else {
-            apn = new Provider(getOptions(conf));
+            apn = new Provider(getOptions(app.conf));
         }
     }
 }
 
 /**
  * Send notification to APNS
- * @export
- * @param {!Logger} logger
- * @param {!Metrics} metrics
+ * @param {!Application} app
  * @param {!MultiDeviceMessage} message Notification to be pushed to device
  * @return {!Promise<Responses>}
  */
-export async function sendMessage(logger: Logger,
-                                  metrics: Metrics,
-                                  message: MultiDeviceMessage): Promise<Responses> {
+export async function sendMessage(app: Application, message: MultiDeviceMessage):
+    Promise<Responses> {
     const transactionHistogramArgs = {
         type: 'Histogram',
         name: 'APNSTransactionHistogram',
@@ -94,8 +92,8 @@ export async function sendMessage(logger: Logger,
             sent: [{ device: 'dryRun' }],
             failed: []
         };
-        logger.log('debug/apns', JSON.stringify(message));
-        metrics.makeMetric(transactionHistogramArgs).observe(Date.now() - transactionStart);
+        app.logger.log('debug/apns', JSON.stringify(message));
+        app.metrics.makeMetric(transactionHistogramArgs).observe(Date.now() - transactionStart);
         return message;
     }
 
@@ -105,13 +103,13 @@ export async function sendMessage(logger: Logger,
     notification.topic = message.meta.topic;
     const response: Responses = await apn.send(notification, [...message.deviceTokens]);
 
-    metrics.makeMetric(transactionHistogramArgs).observe(Date.now() - transactionStart);
-
-    logger.log('debug/apns', `Successfully sent ${(response.sent.length)} messages; ` +
+    app.logger.log('debug/apns', `Successfully sent ${(response.sent.length)} messages; ` +
         `${response.failed.length} messages failed`);
 
+    app.metrics.makeMetric(transactionHistogramArgs).observe(Date.now() - transactionStart);
+
     const successCount = response.sent.length;
-    metrics.makeMetric({
+    app.metrics.makeMetric({
         type: 'Counter',
         name: 'APNSSendSuccess',
         prometheus: {
@@ -123,7 +121,7 @@ export async function sendMessage(logger: Logger,
     );
 
     const failureCount = response.failed.length;
-    metrics.makeMetric({
+    app.metrics.makeMetric({
         type: 'Counter',
         name: 'APNSSendFailure',
         prometheus: {
@@ -135,4 +133,8 @@ export async function sendMessage(logger: Logger,
     );
 
     return response;
+}
+
+export function getFailedTokens(response: Responses): string[] {
+    return response.failed.map((rsp) => rsp.device);
 }

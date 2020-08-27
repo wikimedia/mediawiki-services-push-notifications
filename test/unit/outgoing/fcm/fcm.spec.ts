@@ -3,7 +3,7 @@ import nock from 'nock';
 import * as MockCredential from '../../../mocks/credential';
 import Logger from '../../../mocks/logger';
 import * as admin from 'firebase-admin';
-import { sendMessage as fcmSendMessage } from '../../../../src/outgoing/fcm/fcm';
+import { getMulticastMessage, init, sendMessage } from '../../../../src/outgoing/fcm/fcm';
 import {
     MessageType,
     MultiDeviceMessage,
@@ -14,6 +14,11 @@ const { createMultipartPayload } = require('../../../utils/fcm.ts');
 const makeMetrics = require('service-runner/lib/metrics');
 
 describe('unit:FCM', () => {
+    const logger = new Logger();
+    const app: any = {
+        conf: { apns: { mock: true } },
+        logger
+    };
     let adminCredentialStub, scope;
 
     before(async () => {
@@ -29,6 +34,7 @@ describe('unit:FCM', () => {
             .reply(200, createMultipartPayload(), {
                 'Content-type': 'multipart/mixed; boundary=boundary'
             });
+        init(app);
     });
 
     after(async () => {
@@ -36,22 +42,22 @@ describe('unit:FCM', () => {
         // Delete mocked FCM app otherwise mocha will hang
         await admin.app().delete();
         scope.done();
-        nock.restore();
+        nock.cleanAll();
     });
 
     it('fcmSendMessage', async () => {
-        const logger = new Logger();
-        const metrics = sinon.spy(makeMetrics([{
+        app.metrics = sinon.spy(makeMetrics([{
             type: 'prometheus',
             port: 9000,
             name: 'test'
         }], logger));
-        await fcmSendMessage(logger, metrics, new MultiDeviceMessage(
+        const multicastMessage = getMulticastMessage(new MultiDeviceMessage(
             new Set(['TOKEN']),
             PushProvider.FCM,
             MessageType.CheckEchoV1,
             {},
             true
         ));
+        await sendMessage(app, multicastMessage);
     });
 });

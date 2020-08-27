@@ -68,7 +68,7 @@ services:
         method: post
         uri: http://api.svc.eqiad.wmnet/w/api.php
         headers:
-          host: '{{request.params.domain}}'
+          host: meta.wikimedia.org
           user-agent: '{{user-agent}}'
         body: '{{ default(request.query, {}) }}'
       mw_subscription_manager_username: REPLACE_ME
