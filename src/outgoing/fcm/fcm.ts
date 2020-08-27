@@ -40,7 +40,9 @@ async function send(logger: Logger,
             name: 'push_notifications_fcm_send_success',
             help: 'Count of successful FCM notifications sent'
         }
-    }).increment(response.successCount);
+    }).increment(
+        response.successCount === null || response.successCount === undefined ? 0 : response.successCount
+    );
 
     metrics.makeMetric({
         type: 'Counter',
@@ -49,7 +51,9 @@ async function send(logger: Logger,
             name: 'push_notifications_fcm_send_failure',
             help: 'Count of failed FCM notifications sent'
         }
-    }).increment(response.failureCount);
+    }).increment(
+        response.failureCount === null || response.failureCount === undefined ? 0 : response.failureCount
+    );
 }
 
 export async function sendMessage(logger: Logger,

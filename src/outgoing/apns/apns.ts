@@ -110,6 +110,7 @@ export async function sendMessage(logger: Logger,
     logger.log('debug/apns', `Successfully sent ${(response.sent.length)} messages; ` +
         `${response.failed.length} messages failed`);
 
+    const successCount = response.sent.length;
     metrics.makeMetric({
         type: 'Counter',
         name: 'APNSSendSuccess',
@@ -117,8 +118,11 @@ export async function sendMessage(logger: Logger,
             name: 'push_notifications_apns_send_success',
             help: 'Count of successful APNS notifications sent'
         }
-    }).increment(response.sent.length);
+    }).increment(
+        successCount === null || successCount === undefined ? 0 : successCount
+    );
 
+    const failureCount = response.failed.length;
     metrics.makeMetric({
         type: 'Counter',
         name: 'APNSSendFailure',
@@ -126,7 +130,9 @@ export async function sendMessage(logger: Logger,
             name: 'push_notifications_apns_send_failure',
             help: 'Count of failed APNS notifications sent'
         }
-    }).increment(response.failed.length);
+    }).increment(
+        failureCount === null || failureCount === undefined ? 0 : failureCount
+    );
 
     return response;
 }
