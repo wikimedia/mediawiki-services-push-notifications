@@ -17,7 +17,23 @@ export function init(app: Application): void {
 export async function sendMessage(app: Application, message: MulticastMessage, dryRun?: boolean):
     Promise<BatchResponse> {
     const transactionStart = Date.now();
-    const response: BatchResponse = await admin.messaging().sendMulticast(message, dryRun);
+    const fcmFailureMetric = app.metrics.makeMetric({
+            type: 'Counter',
+            name: 'FCMSendFailure',
+            prometheus: {
+                name: 'push_notifications_fcm_send_failure',
+                help: 'Count of failed FCM notifications sent'
+            }
+    });
+
+    let response: BatchResponse;
+
+    try {
+        response = await admin.messaging().sendMulticast(message, dryRun);
+    } catch (err) {
+        fcmFailureMetric.increment(message.tokens.length);
+        throw err;
+    }
 
     app.logger.log('debug/fcm', `Successfully sent ${response.successCount} messages; ` +
         `${response.failureCount} messages failed`);
@@ -49,14 +65,7 @@ export async function sendMessage(app: Application, message: MulticastMessage, d
     if (failureCount === null || failureCount === undefined) {
         failureCount = 0;
     }
-    app.metrics.makeMetric({
-        type: 'Counter',
-        name: 'FCMSendFailure',
-        prometheus: {
-            name: 'push_notifications_fcm_send_failure',
-            help: 'Count of failed FCM notifications sent'
-        }
-    }).increment(failureCount);
+    fcmFailureMetric.increment(failureCount);
 
     return response;
 }
