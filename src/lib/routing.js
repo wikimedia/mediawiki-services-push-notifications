@@ -106,7 +106,7 @@ function wrapRouteHandlers(route, app) {
                     name: 'express_router_request_duration_seconds',
                     help: 'request duration handled by router in seconds',
                     staticLabels: app.metrics.getServiceLabel(),
-                    buckets: [0.01, 0.05, 0.1, 0.3, 1]
+                    buckets: [0.01, 0.05, 0.1, 0.5, 1, 5, 10, 30, 60]
                 },
                 labels: {
                     names: ['path', 'method', 'status'],
@@ -122,7 +122,10 @@ function wrapRouteHandlers(route, app) {
                     if (statusCode < 100 || statusCode > 599) {
                         statusCode = 500;
                     }
-                    metric.endTiming(startTime, [path || 'root', req.method, statusCode]);
+                    metric.observe(
+                        Date.now() - startTime,
+                        [path || 'root', req.method, statusCode]
+                    );
                 });
             };
         });
