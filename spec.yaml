@@ -170,6 +170,15 @@ paths:
                   description: Set this property to true if the message should not reach the target device.
                   example: false
         required: true
+      x-amples:
+        - title: FCM message (dry-run)
+          request:
+            body:
+              deviceTokens: ['x-ample-fcm']
+              messageType: 'checkEchoV1'
+              dryRun: true
+          response:
+            status: 200
       responses:
         200:
           description: Success
@@ -195,7 +204,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/problem'
-      x-monitor: false
 
   /v1/message/apns:
     post:
@@ -228,6 +236,15 @@ paths:
                   description: Set this property to true if the message should not reach the target device.
                   example: false
         required: true
+      x-amples:
+        - title: APNS message (dry-run)
+          request:
+            body:
+              deviceTokens: ['x-ample-apns']
+              messageType: 'checkEchoV1'
+              dryRun: true
+          response:
+            status: 200
       responses:
         200:
           description: Success
@@ -253,7 +270,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/problem'
-      x-monitor: false
 
 components:
   schemas:
