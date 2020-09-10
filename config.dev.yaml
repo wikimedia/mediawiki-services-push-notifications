@@ -43,11 +43,8 @@ services:
       # cors: restricted.domain.org
       # content for the CSP headers
       # csp: false  # uncomment this line to disable sending them
-      # proxy object to use (host and port)
-      # proxy:
-      #  host: 127.0.0.1
-      #  port: 8888
-      #  protocol: http
+      # proxy object to use (URL format <protocol>//<host>:<port>)
+      # proxy: http://127.0.0.1:8888
       # the list of domains for which not to use the proxy defined above
       # no_proxy_list:
       #   - domain1.com
