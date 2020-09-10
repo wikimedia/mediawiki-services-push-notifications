@@ -45,7 +45,8 @@ export function initCommonConfig(app) {
 
     // set up the spec
     if (!app.conf.spec) {
-        app.conf.spec = `${__dirname}/spec.yaml`;
+        app.conf.spec = `${__dirname}/../../spec.yaml`;
+        app.logger.log('debug/spec', `Spec not defined in config. Using default: ${app.conf.spec}`);
     }
     if (app.conf.spec.constructor !== Object) {
         try {
