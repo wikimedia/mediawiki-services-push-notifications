@@ -5,11 +5,14 @@ import {
     PushProvider
 } from '../../../../src/outgoing/shared/Message';
 import assert from '../../../utils/assert';
+import * as nodeAssert from 'assert';
 import Logger from '../../../mocks/logger';
+import rewire from 'rewire';
 import sinon from 'sinon';
 import { Client as MockClient } from 'apn/mock';
 
 const makeMetrics = require('service-runner/lib/metrics');
+const apnsRewired = rewire('../../../../src/outgoing/apns/apns.ts');
 
 describe('unit:APNS', () => {
     const logger = new Logger();
@@ -85,5 +88,29 @@ describe('unit:APNS', () => {
         ));
         sinon.assert.calledOnce(spy);
         assert.deepEqual(spy.firstCall.args[0].headers, {});
+    });
+
+    it('should return a proxy object', () => {
+        const getProxy = apnsRewired.__get__('getProxy');
+        const result = getProxy('http://proxyhost:1234');
+        assert.deepEqual(result, { host: 'proxyhost', port: 1234 });
+    });
+
+    it('should return a proxy object with port 80', () => {
+        const getProxy = apnsRewired.__get__('getProxy');
+        const result = getProxy('http://proxyhost');
+        assert.deepEqual(result, { host: 'proxyhost', port: 80 });
+    });
+
+    it('should return a proxy object with port 443', () => {
+        const getProxy = apnsRewired.__get__('getProxy');
+        const result = getProxy('https://proxyhost');
+        assert.deepEqual(result, { host: 'proxyhost', port: 443 });
+    });
+
+    it('should raise an error because proxy is not well-defined', () => {
+        const getProxy = apnsRewired.__get__('getProxy');
+        const errorMsg = 'Proxy port is missing and protocol not known';
+        nodeAssert.throws(() => getProxy('foo://proxyhost'), Error, errorMsg);
     });
 });

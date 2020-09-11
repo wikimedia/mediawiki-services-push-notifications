@@ -22,11 +22,8 @@ export function initCommonConfig(app) {
     }
 
     // set outgoing proxy
-    if (app.conf.proxy && app.conf.proxy.host) {
-        const proxyProtocol = app.conf.proxy.protocol || 'http';
-        let proxyUrl = app.conf.proxy.host;
-        proxyUrl += (app.conf.proxy.port ? `:${app.conf.proxy.port}` : '');
-        app.conf.proxyAgent = new ProxyAgent(`${proxyProtocol}://${proxyUrl}`);
+    if (app.conf.proxy) {
+        app.conf.proxyAgent = new ProxyAgent(app.conf.proxy);
     }
 
     // set up header whitelisting for logging

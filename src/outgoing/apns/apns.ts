@@ -3,11 +3,39 @@ import { Provider as MockProvider } from 'apn/mock';
 import { MultiDeviceMessage } from '../shared/Message';
 import prometheusClient from 'prom-client';
 import { Application } from 'express';
+import * as url from 'url';
 
 let apn: Provider;
 
+interface Proxy {
+    host: string;
+    port: number;
+}
+
 interface ProviderOptionsProxy {
-    proxy?: any;
+    proxy?: Proxy;
+}
+
+/**
+ * Parse the proxy URL and return a proxy object
+ * for APN provider
+ * @param {!string} proxyURL
+ * @return {!Proxy}
+ */
+function getProxy(proxyURL: string): Proxy {
+    const proxy = url.parse(proxyURL);
+    const knownPorts = { 'http:': 80, 'https:': 443 };
+
+    // For known protocols node URL parse omits the port
+    if (!proxy.port) {
+        if (proxy.protocol in knownPorts) {
+            return { host: proxy.hostname, port: knownPorts[proxy.protocol] };
+        } else {
+            throw new Error('Proxy port is missing and protocol not known');
+        }
+    }
+
+    return { host: proxy.hostname, port: parseInt(proxy.port) };
 }
 
 /**
@@ -27,10 +55,7 @@ function getOptions(conf): ProviderOptions {
     if (conf.proxy) {
         options = {
             ...options,
-            proxy: {
-                host: conf.proxy.host,
-                port: conf.proxy.port
-            }
+            proxy: getProxy(conf.proxy)
         };
     }
 
