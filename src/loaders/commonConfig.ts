@@ -18,7 +18,7 @@ export function initCommonConfig(app) {
     app.conf.cors = app.conf.cors === undefined ? '*' : app.conf.cors;
     if (app.conf.csp === undefined) {
         // eslint-disable-next-line max-len
-        app.conf.csp = "default-src 'self'; object-src 'none'; media-src *; img-src *; style-src *; frame-ancestors 'self'";
+        app.conf.csp = "default-src 'self'; object-src 'none'; media-src 'none'; img-src 'none'; style-src 'none'; frame-ancestors 'self'; base-uri: 'self'";
     }
 
     // set outgoing proxy
@@ -80,8 +80,6 @@ export function initCommonConfig(app) {
             res.header('x-content-type-options', 'nosniff');
             res.header('x-frame-options', 'SAMEORIGIN');
             res.header('content-security-policy', app.conf.csp);
-            res.header('x-content-security-policy', app.conf.csp);
-            res.header('x-webkit-csp', app.conf.csp);
         }
         sUtil.initAndLogRequest(req, app);
         next();
