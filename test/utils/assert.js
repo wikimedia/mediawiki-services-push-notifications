@@ -28,6 +28,13 @@ function status(res, expected) {
  * @param {string} expectedRegexString
  */
 function contentType(res, expectedRegexString) {
+    // Sanitize expectedRegexString input
+    // Add further acceptable regex as needed
+    const acceptedRegexStrings = ['application/json'];
+    const isAcceptedRegex = acceptedRegexStrings.indexOf(expectedRegexString) >= 0;
+    const msg = `Non-accepted value '${expectedRegexString}' for expectedRegexString, you might want to consider updating 'acceptedRegexStrings'`;
+    assert.ok(isAcceptedRegex, msg);
+
     const actual = res.headers['content-type'];
     assert.ok(RegExp(expectedRegexString).test(actual),
         `Expected content-type to match ${expectedRegexString}, but was ${actual}`);
