@@ -34,7 +34,7 @@ router.post('/message/apns', async (req, res) => {
         PushProvider.APNS,
         req.body.messageType,
         meta,
-        !!req.body.dryRun,
+        !!req.body.dryRun
     );
     await enqueueMessages(app.queue, message);
     res.status(200).json({});

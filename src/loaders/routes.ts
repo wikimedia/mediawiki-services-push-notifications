@@ -5,6 +5,7 @@ const sUtil = require('../lib/routing');
 
 /**
  * Loads all routes declared in routes/ into the app
+ *
  * @param {Application} app the application object to load routes into
  * @param {string} dir routes folder
  * @return {BBPromise} a promise resolving to the app object

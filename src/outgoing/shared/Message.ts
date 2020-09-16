@@ -37,7 +37,7 @@ export class SingleDeviceMessage extends Message {
         provider: PushProvider,
         type: MessageType,
         meta: MessageMeta,
-        dryRun?: boolean,
+        dryRun?: boolean
     ) {
         super(provider, type, meta, dryRun);
         this.deviceToken = deviceToken;
@@ -61,6 +61,7 @@ export class MultiDeviceMessage extends Message {
 
     /**
      * Split a MultiDeviceMessage into separate SingleDeviceMessages for each device token.
+     *
      * @return {!Array<SingleDeviceMessage>}
      */
     public toSingleDeviceMessages(): Array<SingleDeviceMessage> {

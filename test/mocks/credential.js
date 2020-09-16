@@ -4,6 +4,7 @@
 class ServiceAccountCredential {
     /**
      * getAccessToken mock
+     *
      * @return {{access_token: string, expires_in: number}}
      */
     getAccessToken() {
@@ -17,6 +18,7 @@ class ServiceAccountCredential {
 /**
  * Mock of the applicationDefault function provided by the firebase admin library
  * https://firebase.google.com/docs/reference/admin/node/admin.credential#applicationdefault
+ *
  * @return {ServiceAccountCredential}
  */
 export function applicationDefault() {

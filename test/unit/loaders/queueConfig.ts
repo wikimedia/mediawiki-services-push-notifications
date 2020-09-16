@@ -1,4 +1,3 @@
-// @ts-nocheck
 import rewire from 'rewire';
 import assert from '../../utils/assert';
 
@@ -11,9 +10,15 @@ describe('unit:config', () => {
         it('generates a random flushTimeout within the specified range', () => {
             const options = { flushTimeoutMs: 'random', flushTimeoutMin: 5, flushTimeoutMax: 10 };
             const flushTimeoutMs = getRandomFlushTimeout(options);
-            assert.ok(typeof flushTimeoutMs === 'number');
-            assert.ok(flushTimeoutMs >= 5);
-            assert.ok(flushTimeoutMs <= 10);
+
+            // Workaround for asserting generic flushTimeoutMs
+            type Assert = (value: boolean) => asserts value;
+            const getAssert = () => assert.ok;
+            const ok: Assert = getAssert();
+
+            ok(typeof flushTimeoutMs === 'number');
+            ok(flushTimeoutMs >= 5);
+            ok(flushTimeoutMs <= 10);
         });
     });
 });

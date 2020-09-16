@@ -1,8 +1,9 @@
 import * as admin from 'firebase-admin';
+import messaging = admin.messaging;
 import prometheusClient from 'prom-client';
 import { MultiDeviceMessage } from '../shared/Message';
-import MulticastMessage = admin.messaging.MulticastMessage;
-import BatchResponse = admin.messaging.BatchResponse;
+import MulticastMessage = messaging.MulticastMessage;
+import BatchResponse = messaging.BatchResponse;
 import { Application } from 'express';
 
 export function init(app: Application): void {

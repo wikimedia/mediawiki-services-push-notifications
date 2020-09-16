@@ -1,9 +1,7 @@
-'use strict';
-
 const BBPromise = require('bluebird');
 const preq = require('preq');
 const express = require('express');
-const uuidv1 = require('uuid/v1');
+const { v1: uuidv1 } = require('uuid');
 const bunyan = require('bunyan');
 
 /**
@@ -36,6 +34,7 @@ class HTTPError extends Error {
 
 /**
  * Generates an object suitable for logging out of a request object
+ *
  * @param {!Request} req          the request
  * @param {?RegExp}  whitelistRE  the RegExp used to filter headers
  * @return {!Object} an object containing the key components of the request
@@ -65,6 +64,7 @@ function reqForLog(req, whitelistRE) {
 
 /**
  * Serialises an error object in a form suitable for logging.
+ *
  * @param {!Error} err error to serialise
  * @return {!Object} the serialised version of the error
  */
@@ -87,6 +87,7 @@ function errForLog(err) {
  * promised try blocks so as to allow catching all errors,
  * regardless of whether a handler returns/uses promises
  * or not.
+ *
  * @param {!Object} route the object containing the router and path to bind it to
  * @param {!Application} app the application object
  */
@@ -98,7 +99,6 @@ function wrapRouteHandlers(route, app) {
             .replace(/[/?]+$/, '');
         routerLayer.route.stack.forEach((layer) => {
             const origHandler = layer.handle;
-            // eslint-disable-next-line no-unused-vars
             const metric = app.metrics.makeMetric({
                 type: 'Histogram',
                 name: 'router',
@@ -134,6 +134,7 @@ function wrapRouteHandlers(route, app) {
 
 /**
  * Generates an error handler for the given applications and installs it.
+ *
  * @param {!Application} app the application object to add the handler to
  */
 function setErrorHandler(app) {
@@ -211,6 +212,7 @@ function setErrorHandler(app) {
 
 /**
  * Creates a new router with some default options.
+ *
  * @param {?Object} [opts] additional options to pass to express.Router()
  * @return {!Router} a new router object
  */
@@ -251,6 +253,7 @@ function validateRequestObject(request, headers) {
 
 /**
  * Adds logger to the request and logs it.
+ *
  * @param {!*} req request object
  * @param {!Application} app application object
  */

@@ -34,7 +34,8 @@ import { sendSubscriptionDeleteRequest } from '../outgoing/shared/mwapi';
 // TODO: Drop the shim and use the native Promise.allSettled when we migrate to Node 12
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/allSettled
 import allSettled from 'promise.allsettled';
-import BatchResponse = admin.messaging.BatchResponse;
+import messaging = admin.messaging;
+import BatchResponse = messaging.BatchResponse;
 
 allSettled.shim();
 
@@ -61,6 +62,7 @@ export const MAX_MULTICAST_RECIPIENTS = 500;
  *    MultiDeviceMessage at the tail of the batched message array.
  * N.B. This function returns void but updates the state of the batchedMessages object passed in
  * from outside the function scope.
+ *
  * @param {!any} batchedMessages
  * @param {!SingleDeviceMessage} message
  */
@@ -94,6 +96,7 @@ function addBatchableMessage(batchedMessages: any, message: SingleDeviceMessage)
 
 /**
  * Consolidates messages for efficient batched sending by provider, type, and dryRun status.
+ *
  * @param {!Array<SingleDeviceMessage>} messages
  * @return {!Array<MultiDeviceMessage>}
  */
@@ -110,6 +113,7 @@ function getBatchedMessages(messages: Array<SingleDeviceMessage>): Array<MultiDe
 /**
  * Enqueue messages for one or more device tokens. If a queue does not yet exist for the provider
  * and message type, a new queue is lazily initialized.
+ *
  * @param {!Queue} queue the app's message queue
  * @param {!MultiDeviceMessage} message
  */
@@ -122,6 +126,7 @@ export function enqueueMessages(queue: Queue, message: MultiDeviceMessage): void
 
 /**
  * Initialize and return a queue for the provider and message type.
+ *
  * @param {!Application} app
  */
 export function init(app: any): Queue {
@@ -162,8 +167,9 @@ export function init(app: any): Queue {
 
         const batchedMessages = getBatchedMessages(messages);
 
-        // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore: method added by shim
+        // eslint-disable-next-line es/no-promise-all-settled
         return Promise.allSettled(batchedMessages.map(async (message: MultiDeviceMessage) => {
             switch (message.provider) {
                 case PushProvider.FCM: {

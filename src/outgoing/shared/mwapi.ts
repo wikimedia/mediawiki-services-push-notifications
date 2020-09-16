@@ -4,6 +4,7 @@ import { mwApiGetToken, mwApiLogin, mwApiPost } from '../../lib/api-util';
  * Send a request to the MediaWiki API to delete the subscriptions associated with a set of
  * tokens.
  * Intended for use when provider APIs identify tokens as invalid.
+ *
  * @param {!Application} app
  * @param {!Array<string>} tokens
  * @param {?boolean} loginRetry

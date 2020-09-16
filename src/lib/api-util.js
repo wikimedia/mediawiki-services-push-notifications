@@ -11,6 +11,7 @@ const TokenType = {
 
 /**
  * Calls the MW API with the supplied query as its body
+ *
  * @param {!Application} app the incoming request object
  * @param {!Object} query an object with all the query parameters for the MW API
  * @param {?Object} headers additional headers to pass to the MW API
@@ -45,6 +46,7 @@ function mwApiPost(app, query, headers = {}) {
 
 /**
  * Get a token from MediaWiki.
+ *
  * @param {!Application} app the application object
  * @param {!TokenType} type token type to request
  * @return {!Promise}
@@ -59,6 +61,7 @@ function mwApiGetToken(app, type = TokenType.CSRF) {
 
 /**
  * Log in to MediaWiki.
+ *
  * @param {!Application} app the application object
  * @return {!Promise}
  */
@@ -81,6 +84,7 @@ function mwApiLogin(app) {
 
 /**
  * Sets up the request template for MW API requests
+ *
  * @param {!Application} app the application object
  */
 function setupApiTemplates(app) {

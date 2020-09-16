@@ -7,6 +7,7 @@ const apiUtil = require('../lib/api-util');
 
 /**
  * Loads configuration of common Node service template items.
+ *
  * @param {Express} app Express application
  */
 export function initCommonConfig(app) {
@@ -17,7 +18,6 @@ export function initCommonConfig(app) {
     app.conf.compression_level = app.conf.compression_level === undefined ? 3 : app.conf.compression_level;
     app.conf.cors = app.conf.cors === undefined ? '*' : app.conf.cors;
     if (app.conf.csp === undefined) {
-        // eslint-disable-next-line max-len
         app.conf.csp = "default-src 'self'; object-src 'none'; media-src 'none'; img-src 'none'; style-src 'none'; frame-ancestors 'self'; base-uri: 'self'";
     }
 

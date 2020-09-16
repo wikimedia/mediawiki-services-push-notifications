@@ -62,10 +62,10 @@ function constructTestCase(title, path, method, request, response) {
     };
 }
 
-function constructTests(spec) {
+function constructTests(testSpec) {
     const ret = [];
-    const paths = spec.paths;
-    const defParams = spec['x-default-params'] || {};
+    const paths = testSpec.paths;
+    const defParams = testSpec['x-default-params'] || {};
 
     Object.keys(paths).forEach((pathStr) => {
         Object.keys(paths[pathStr]).forEach((method) => {
@@ -254,12 +254,12 @@ describe('Swagger spec', function () {
             spec = res.body;
             return spec;
         })
-        .then((spec) => {
+        .then((result) => {
             const routeTests = () => {
                 before(() => server.start());
                 after(() => server.stop());
 
-                constructTests(spec).forEach((testCase) => {
+                constructTests(result).forEach((testCase) => {
                     it(testCase.title, function () {
                         return preq(testCase.request)
                         .then((res) => {

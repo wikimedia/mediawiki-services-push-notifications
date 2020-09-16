@@ -25,6 +25,7 @@ function assertSafeNonNegativeInteger(val: any, name = 'value') {
 /**
  * Validate randomized flush timeout settings.
  * Assumes that the existence of the options has already been checked.
+ *
  * @param {!QueueOptions} options queue options
  * @throws AssertionError
  */
@@ -41,6 +42,7 @@ function validateRandomFlushTimeout(options: QueueOptions): void {
 /**
  * Validate flush timeout settings. The value of flushTimeout may be either an integer or 'random'.
  * Assumes that the existence of the options has already been checked.
+ *
  * @param {!QueueOptions} options queue options
  * @throws AssertionError
  */
@@ -51,14 +53,13 @@ function validateFlushTimeout(options: QueueOptions): void {
         const flushTimeoutMs = options.flushTimeoutMs;
         assert.deepStrictEqual('number', typeof flushTimeoutMs, 'flushTimeout must be a number ' +
             'or \'random\'');
-        // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-        // @ts-ignore: flushTimeout is a number per the above assert
         assertSafeNonNegativeInteger(flushTimeoutMs, 'flushTimeout');
     }
 }
 
 /**
  * Validate the queueing options, if any.
+ *
  * @param {?QueueOptions} options
  * @throws AssertionError
  */
@@ -81,6 +82,7 @@ function getRandomInt(min: number, max: number): number {
 /**
  * Get a random flush timeout value based on the configured min/max.
  * Assumes that the queueing options have been validated at load time.
+ *
  * @param {!QueueOptions} options
  * @return {!number}
  */
@@ -92,6 +94,7 @@ function getRandomFlushTimeout(options: QueueOptions): number {
  * Attempt to get a flush timeout value from the application configuration.
  * Assumes that the queueing options have been validated at load time.
  * Defaults to DEFAULT_FLUSH_TIMEOUT.
+ *
  * @param {!QueueOptions} options
  * @return {!number}
  */
@@ -99,7 +102,6 @@ export function getFlushTimeout(options: QueueOptions): number {
     if (options.flushTimeoutMs === 'random') {
         return getRandomFlushTimeout(options);
     }
-    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-    // @ts-ignore: flushTimeoutMs is either a number or 'random'
-    return options.flushTimeoutMs;
+
+    return options.flushTimeoutMs as number;
 }

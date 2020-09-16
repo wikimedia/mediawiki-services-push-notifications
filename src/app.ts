@@ -7,6 +7,7 @@ import * as loaders from './loaders';
 
 /**
  * Creates an express app and initialises it
+ *
  * @param {Object} options the options to initialise the app with
  * @return {BBPromise} the promise resolving to the app object
  */
@@ -25,6 +26,7 @@ function initApp(options) {
 
 /**
  * Creates and start the service's web server
+ *
  * @param {Application} app the app object to use in the service
  * @return {BBPromise} a promise creating the web server
  */
@@ -60,6 +62,7 @@ function createServer(app) {
  * options and the logger- and metrics-reporting objects from
  * service-runner and starts an HTTP server, attaching the application
  * object to it.
+ *
  * @param {Object} options the options to initialise the app with
  * @return {BBPromise} HTTP server
  */

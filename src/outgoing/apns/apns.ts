@@ -19,11 +19,12 @@ interface ProviderOptionsProxy {
 /**
  * Parse the proxy URL and return a proxy object
  * for APN provider
+ *
  * @param {!string} proxyURL
  * @return {!Proxy}
  */
 function getProxy(proxyURL: string): Proxy {
-    const proxy = url.parse(proxyURL);
+    const proxy = new url.URL(proxyURL);
     const knownPorts = { 'http:': 80, 'https:': 443 };
 
     // For known protocols node URL parse omits the port
@@ -42,6 +43,7 @@ function getProxy(proxyURL: string): Proxy {
  * Get the options to initialize APNS client
  * If token based auth is defined in config then its preferred
  * Fallback to cert based auth
+ *
  * @param {*} conf
  * @return {ProviderOptions}
  */
@@ -80,6 +82,7 @@ function getOptions(conf): ProviderOptions {
 
 /**
  * Initialize APNS client. Uses mock if configured accordingly.
+ *
  * @export
  * @param {!Application} app Express app
  */
@@ -95,6 +98,7 @@ export function init(app: Application): void {
 
 /**
  * Send notification to APNS
+ *
  * @param {!Application} app
  * @param {!MultiDeviceMessage} message Notification to be pushed to device
  * @return {!Promise<Responses>}
@@ -113,13 +117,13 @@ export async function sendMessage(app: Application, message: MultiDeviceMessage)
     const transactionStart = Date.now();
 
     if (message.dryRun) {
-        const message: Responses = {
+        const responseMessage: Responses = {
             sent: [{ device: 'dryRun' }],
             failed: []
         };
         app.logger.log('debug/apns', JSON.stringify(message));
         app.metrics.makeMetric(transactionHistogramArgs).observe(Date.now() - transactionStart);
-        return message;
+        return responseMessage;
     }
 
     const notification = new Notification();

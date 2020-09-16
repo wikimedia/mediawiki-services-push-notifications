@@ -5,12 +5,12 @@
     "plugin:@typescript-eslint/recommended",
     "wikimedia/server",
     "wikimedia/node",
-    "wikimedia/language/es2016"
+    "wikimedia/language/es2017"
   ],
   "plugins": ["json", "jsdoc"],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
-    "ecmaVersion": 2020,
+    "ecmaVersion": 2017,
     "sourceType": "module"
   },
   "rules": {
@@ -34,9 +34,16 @@
     "no-underscore-dangle": "off",
     "array-bracket-spacing": "off",
     "padded-blocks": ["error", "never"],
+    "no-shadow": "off",
+    "@typescript-eslint/no-shadow": "error",
     "@typescript-eslint/no-var-requires": "off",
     "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/explicit-function-return-type": "off",
     "@typescript-eslint/camelcase": "off"
+  },
+  "settings": {
+    "node": {
+      "tryExtensions": [".js", ".json", ".node", ".ts"]
+    }
   }
 }
