@@ -17,7 +17,7 @@ const apnsRewired = rewire('../../../../src/outgoing/apns/apns.ts');
 describe('unit:APNS', () => {
     const logger = new Logger();
     const app: any = {
-        conf: { apns: { mock: true } },
+        conf: { apns: { mock: true, debug_topics: ['debug_client'] } },
         logger
     };
     let sandbox;
@@ -76,6 +76,41 @@ describe('unit:APNS', () => {
         const expectedHeaders = { 'apns-topic': '123-apns-topic' };
         assert.deepEqual(spy.firstCall.args[0].headers, expectedHeaders);
     });
+
+    it('send APNS message with debug topic', async () => {
+        const meta = {
+            topic: 'debug_client'
+        };
+        const spy = sandbox.spy(MockClient.prototype, 'write');
+        await sendMessage(app, new MultiDeviceMessage(
+            new Set(['TOKEN']),
+            PushProvider.APNS,
+            MessageType.CheckEchoV1,
+            meta,
+            false
+        ));
+        sinon.assert.calledOnce(spy);
+        const body = JSON.parse(spy.firstCall.args[0].body);
+        assert.deepEqual(body.aps.alert.startsWith('Message sent at'), true);
+    });
+
+    it('send APNS message without debug topic', async () => {
+        const meta = {
+            topic: 'not_debug_client'
+        };
+        const spy = sandbox.spy(MockClient.prototype, 'write');
+        await sendMessage(app, new MultiDeviceMessage(
+            new Set(['TOKEN']),
+            PushProvider.APNS,
+            MessageType.CheckEchoV1,
+            meta,
+            false
+        ));
+        sinon.assert.calledOnce(spy);
+        const body = JSON.parse(spy.firstCall.args[0].body);
+        assert.deepEqual('alerts' in body, false);
+    });
+
     it('send APNS message with undefined topic', async () => {
         const meta = {};
         const spy = sandbox.spy(MockClient.prototype, 'write');

@@ -79,6 +79,9 @@ services:
       # Apple Push Notification Service configuration
       apns:
         mock: true
+        # Topics for which user-visible notifications should be displayed
+        # debug_topics:
+        #   - org.wikimedia.Notifications-Utility
       # Queueing options. If defined, requests will be enqueued according to the specified options
       # rather than immediately sent.
       queueing:

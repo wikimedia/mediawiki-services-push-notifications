@@ -130,6 +130,11 @@ export async function sendMessage(app: Application, message: MultiDeviceMessage)
     notification.payload = { data: { type: message.type } };
     notification.threadId = message.type;
     notification.topic = message.meta.topic;
+    const hasDebugTopics = app.conf.apns.debug_topics && app.conf.apns.debug_topics.length;
+    if (hasDebugTopics && app.conf.apns.debug_topics.includes(notification.topic)) {
+        notification.mutableContent = true;
+        notification.alert = `Message sent at ${transactionStart}`;
+    }
     const response: Responses = await apn.send(notification, [...message.deviceTokens]);
 
     app.logger.log('debug/apns', `Successfully sent ${(response.sent.length)} messages; ` +
