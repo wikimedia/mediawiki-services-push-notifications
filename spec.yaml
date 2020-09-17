@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  version: 0.0.1
+  version: 1.0.0
   title: push-notifications
   description: A service for sending push notification messages
   termsOfService: https://wikimediafoundation.org/wiki/Terms_of_Use
