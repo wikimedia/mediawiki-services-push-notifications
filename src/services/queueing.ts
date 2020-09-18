@@ -10,7 +10,7 @@
  */
 import Queue from 'buffered-queue';
 import prometheusClient from 'prom-client';
-import { Responses } from 'apn';
+import { Responses } from '@wikimedia/apn';
 import {
     getFailedTokens as getFcmFailedTokens,
     getMulticastMessage,

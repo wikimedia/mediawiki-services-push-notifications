@@ -51,7 +51,7 @@
   },
   "homepage": "https://www.mediawiki.org/wiki/Wikimedia_Product_Infrastructure_team/Push_Notifications_Infrastructure",
   "dependencies": {
-    "apn": "^2.2.0",
+    "@wikimedia/apn": "^2.2.1",
     "bluebird": "^3.5.5",
     "body-parser": "^1.19.0",
     "buffered-queue": "^1.0.0",

@@ -1,5 +1,5 @@
-import { Provider, ProviderOptions, Notification, Responses } from 'apn';
-import { Provider as MockProvider } from 'apn/mock';
+import { Provider, ProviderOptions, Notification, Responses } from '@wikimedia/apn';
+import { Provider as MockProvider } from '@wikimedia/apn/mock';
 import { MultiDeviceMessage } from '../shared/Message';
 import prometheusClient from 'prom-client';
 import { Application } from 'express';

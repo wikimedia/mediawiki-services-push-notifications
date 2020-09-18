@@ -9,7 +9,7 @@ import * as nodeAssert from 'assert';
 import Logger from '../../../mocks/logger';
 import rewire from 'rewire';
 import sinon from 'sinon';
-import { Client as MockClient } from 'apn/mock';
+import { Client as MockClient } from '@wikimedia/apn/mock';
 
 const makeMetrics = require('service-runner/lib/metrics');
 const apnsRewired = rewire('../../../../src/outgoing/apns/apns.ts');
