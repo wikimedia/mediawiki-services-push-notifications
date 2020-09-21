@@ -34,8 +34,7 @@ apns:
   production: <true|false>
 ```
 
-If not defined, `apn-node` uses production if `NODE_ENV=production` else it
-falls back to sandbox.
+If not defined the configuration defaults to `false` (sandbox).
 
 ### Development
 

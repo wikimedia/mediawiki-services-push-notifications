@@ -50,9 +50,7 @@ function getProxy(proxyURL: string): Proxy {
 function getOptions(conf): ProviderOptions {
     let options: ProviderOptions & ProviderOptionsProxy = {};
 
-    if (conf.apns.production) {
-        options = { production: conf.apns.production };
-    }
+    options = { production: conf.apns.production ?? false };
 
     if (conf.proxy) {
         options = {

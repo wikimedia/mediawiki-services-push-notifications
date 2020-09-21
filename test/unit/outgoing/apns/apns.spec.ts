@@ -148,4 +148,25 @@ describe('unit:APNS', () => {
         const errorMsg = 'Proxy port is missing and protocol not known';
         nodeAssert.throws(() => getProxy('foo://proxyhost'), Error, errorMsg);
     });
+
+    it('config should enable production environment', () => {
+        const getOptions = apnsRewired.__get__('getOptions');
+        const conf = { apns: { production: true } };
+        const result = getOptions(conf);
+        assert.deepEqual(result.production, true);
+    });
+
+    it('config should enable sandbox environment', () => {
+        const getOptions = apnsRewired.__get__('getOptions');
+        const conf = { apns: { production: false } };
+        const result = getOptions(conf);
+        assert.deepEqual(result.production, false);
+    });
+
+    it('config should default to sandbox environment', () => {
+        const getOptions = apnsRewired.__get__('getOptions');
+        const conf = { apns: { foo: 'bar' } };
+        const result = getOptions(conf);
+        assert.deepEqual(result.production, false);
+    });
 });
