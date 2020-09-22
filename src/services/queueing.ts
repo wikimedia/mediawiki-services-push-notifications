@@ -193,10 +193,15 @@ export function init(app: any): Queue {
                 default:
                     throw new Error(`Found unknown provider ${message.provider}`);
             }
-        }));
+        })).then((results) => {
+            const failures = results.filter((result) => result.status === 'rejected');
+            failures.forEach((failure) => {
+                app.logger.log('debug', failure.reason);
+            });
+        });
     });
 
     app.queue = queue;
-    app.logger.log('debug/queueing',
+    app.logger.log('warn/queueing',
         `Initialized queue: max size: ${maxSize}, flush timeout (ms): ${flushTimeoutMs}`);
 }

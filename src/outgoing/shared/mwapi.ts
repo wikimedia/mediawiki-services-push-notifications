@@ -28,6 +28,9 @@ export async function sendSubscriptionDeleteRequest(
             providertoken: tokens.join('|'),
             token
         };
-        return mwApiPost(app, query);
+        return mwApiPost(app, query).catch((err) => {
+            app.logger.log('error/mwapi', err);
+            throw err;
+        });
     });
 }

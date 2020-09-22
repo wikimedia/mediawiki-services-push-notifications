@@ -56,7 +56,11 @@ function mwApiGetToken(app, type = TokenType.CSRF) {
         .then((rsp) => {
         return rsp && rsp.body && rsp.body.query && rsp.body.query.tokens &&
             rsp.body.query.tokens[`${type}token`];
-    });
+        })
+        .catch((err) => {
+            app.logger.log('error/mwapi', err);
+            throw err;
+        });
 }
 
 /**
@@ -79,7 +83,10 @@ function mwApiLogin(app) {
             loginreturnurl: 'https://example.com',
             logintoken
         }
-    ));
+    )).catch((err) => {
+        app.logger.log('error/login', err);
+        throw err;
+    });
 }
 
 /**
