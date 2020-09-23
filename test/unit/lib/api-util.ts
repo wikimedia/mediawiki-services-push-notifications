@@ -1,10 +1,12 @@
 import assert from 'assert';
 import nock from 'nock';
 import * as api from '../../../src/lib/api-util';
+import Logger from '../../mocks/logger';
 
 describe('api-util', () => {
     const app = {
-        conf: {}
+        conf: {},
+        logger: new Logger()
     };
 
     before(() => {
