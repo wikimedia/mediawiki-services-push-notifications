@@ -8,9 +8,10 @@ import { Application } from 'express';
 
 export function init(app: Application): void {
     if (!admin.apps.length) {
+        const httpAgent = app.conf && app.conf.proxyAgent;
         admin.initializeApp({
-            credential: admin.credential.applicationDefault(),
-            httpAgent: app.conf && app.conf.proxyAgent
+            credential: admin.credential.applicationDefault(httpAgent),
+            httpAgent
         });
     }
 }
