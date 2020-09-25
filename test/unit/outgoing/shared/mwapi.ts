@@ -1,6 +1,7 @@
 import assert from 'assert';
 import nock from 'nock';
 import * as api from '../../../../src/lib/api-util';
+import Logger from '../../../mocks/logger';
 import { sendSubscriptionDeleteRequest } from '../../../../src/outgoing/shared/mwapi';
 
 describe('unit:mwapi', () => {
@@ -8,7 +9,8 @@ describe('unit:mwapi', () => {
         conf: {
             mw_subscription_manager_username: 'Test user',
             mw_subscription_manager_password: 'Test pass'
-        }
+        },
+        logger: new Logger()
     };
 
     before(() => api.setupApiTemplates(app));
@@ -59,8 +61,11 @@ describe('unit:mwapi', () => {
             });
 
         await sendSubscriptionDeleteRequest(app, ['TOKEN']).then((rsp) => {
-            // Currently we just move on.
-            assert.deepStrictEqual(rsp.status, 200);
+            // Should throw on MW API error response despite the 200 response code
+            assert.fail();
+        }).catch((err) => {
+            assert.deepStrictEqual(err.title, 'api-error-code');
+            assert.deepStrictEqual(err.detail, 'API error message');
         });
 
         scope.done();

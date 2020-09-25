@@ -1,5 +1,4 @@
 const preq = require('preq');
-const BBPromise = require('bluebird');
 const sUtil = require('./routing');
 const Template = require('swagger-router').Template;
 const HTTPError = sUtil.HTTPError;
@@ -30,15 +29,23 @@ function mwApiPost(app, query, headers = {}) {
     request.jar = true;
 
     return preq(request).then((response) => {
-        // TODO: Even MW API error responses come back with status 200. Check for error response
-        //  format instead.
+        // Server error
         if (response.status < 200 || response.status > 399) {
-            return BBPromise.reject(new HTTPError({
+            throw new HTTPError({
                 status: response.status,
                 type: 'api_error',
                 title: 'MW API error',
                 detail: response.body
-            }));
+            });
+        }
+        // MW API Error
+        if (response.body.error) {
+            throw new HTTPError({
+                status: response.status,
+                type: 'api_error',
+                title: response.body.error.code,
+                detail: response.body.error.info
+            });
         }
         return response;
     });
