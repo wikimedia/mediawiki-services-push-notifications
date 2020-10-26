@@ -22,7 +22,10 @@ const TokenType = {
 function mwApiPost(app, query, headers = {}) {
     const request = app.mwapi_tpl.expand({
         request: {
-            headers: { 'user-agent': app.conf.user_agent },
+            headers: {
+                'user-agent': app.conf.user_agent,
+                'X-Forwarded-Proto': 'https'
+            },
             query
         }
     });
