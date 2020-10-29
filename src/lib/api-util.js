@@ -1,10 +1,11 @@
 const preq = require('preq');
+const requestLib = require('request');
 const sUtil = require('./routing');
 const Template = require('swagger-router').Template;
 const HTTPError = sUtil.HTTPError;
 
 // Debug requests for badtoken issues in beta/prod (T260247)
-require('request').debug = true;
+requestLib.debug = true;
 
 const TokenType = {
     CSRF: 'csrf',
@@ -32,9 +33,14 @@ function mwApiPost(app, query, headers = {}) {
     Object.assign(request.headers, headers);
 
     // Use the default cookie jar
-    request.jar = true;
+    request.jar = app.cookieJar || true;
 
     return preq(request).then((response) => {
+        if (app.cookieJar && response.headers['set-cookie']) {
+            response.headers['set-cookie'].forEach((cookie) => {
+                app.cookieJar.setCookie(requestLib.cookie(cookie, request.uri));
+            });
+        }
         // Server error
         if (response.status < 200 || response.status > 399) {
             throw new HTTPError({
@@ -87,6 +93,9 @@ function mwApiLogin(app) {
         throw new Error('mw_subscription_manager_username and mw_subscription_manager_password' +
             ' must be defined in the app configuration!');
     }
+    // Everytime login is called, recreate cookie jar object and expose in the app object
+    // The cookie jar will only be used when using mwApiLogin
+    app.cookieJar = requestLib.jar();
     return mwApiGetToken(app, TokenType.LOGIN).then((logintoken) => mwApiPost(
         app, {
             action: 'clientlogin',
