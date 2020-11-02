@@ -81,10 +81,9 @@ function getOptions(conf): ProviderOptions {
 /**
  * Initialize APNS client. Uses mock if configured accordingly.
  *
- * @export
  * @param {!Application} app Express app
  */
-export function init(app: Application): void {
+function init(app: Application): void {
     if (!apn) {
         if (app.conf.apns.mock) {
             apn = new MockProvider();
@@ -95,7 +94,8 @@ export function init(app: Application): void {
 }
 
 /**
- * Send notification to APNS
+ * Send notification to APNS. The APNS provider is loaded and destroyed during the sendMessage execution
+ * and not loaded during the app init to avoid memory leak T263058
  *
  * @param {!Application} app
  * @param {!MultiDeviceMessage} message Notification to be pushed to device
@@ -103,6 +103,7 @@ export function init(app: Application): void {
  */
 export async function sendMessage(app: Application, message: MultiDeviceMessage):
     Promise<Responses> {
+    init(app);
     const transactionHistogramArgs = {
         type: 'Histogram',
         name: 'APNSTransactionHistogram',
@@ -134,7 +135,7 @@ export async function sendMessage(app: Application, message: MultiDeviceMessage)
         notification.alert = `Message sent at ${transactionStart}`;
     }
     const response: Responses = await apn.send(notification, [...message.deviceTokens]);
-
+    apn.shutdown();
     app.logger.log('debug/apns', `Successfully sent ${(response.sent.length)} messages; ` +
         `${response.failed.length} messages failed`);
 

@@ -1,4 +1,4 @@
-import { init, sendMessage } from '../../../../src/outgoing/apns/apns';
+import { sendMessage } from '../../../../src/outgoing/apns/apns';
 import {
     MessageType,
     MultiDeviceMessage,
@@ -21,10 +21,6 @@ describe('unit:APNS', () => {
         logger
     };
     let sandbox;
-
-    before(() => {
-        init(app);
-    });
 
     beforeEach(() => {
         sandbox = sinon.createSandbox();
