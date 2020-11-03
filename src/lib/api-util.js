@@ -13,6 +13,16 @@ const TokenType = {
 };
 
 /**
+ * Extract Cookie Domain
+ *
+ * @param {!Request} request expressjs request object
+ * @return {!string} return host header if it exists
+ */
+function extractCookieDomain(request) {
+    return request.headers && request.headers.host || request.uri;
+}
+
+/**
  * Calls the MW API with the supplied query as its body
  *
  * @param {!Application} app the incoming request object
@@ -34,11 +44,11 @@ function mwApiPost(app, query, headers = {}) {
 
     // Use the default cookie jar
     request.jar = app.cookieJar || true;
-
     return preq(request).then((response) => {
-        if (app.cookieJar && response.headers['set-cookie']) {
+        const cookieDomain = extractCookieDomain(request);
+        if (app.cookieJar && response.headers['set-cookie'] && cookieDomain) {
             response.headers['set-cookie'].forEach((cookie) => {
-                app.cookieJar.setCookie(requestLib.cookie(cookie, request.uri));
+                app.cookieJar.setCookie(requestLib.cookie(cookie, cookieDomain));
             });
         }
         // Server error
@@ -94,8 +104,10 @@ function mwApiLogin(app) {
             ' must be defined in the app configuration!');
     }
     // Everytime login is called, recreate cookie jar object and expose in the app object
-    // The cookie jar will only be used when using mwApiLogin
-    app.cookieJar = requestLib.jar();
+    // The cookie jar will only be used when using mwApiLogin if config is enabled
+    if (app.conf.enable_custom_cookie_jar) {
+        app.cookieJar = requestLib.jar();
+    }
     return mwApiGetToken(app, TokenType.LOGIN).then((logintoken) => mwApiPost(
         app, {
             action: 'clientlogin',
@@ -132,5 +144,6 @@ module.exports = {
     mwApiGetToken,
     mwApiLogin,
     mwApiPost,
-    setupApiTemplates
+    setupApiTemplates,
+    extractCookieDomain
 };

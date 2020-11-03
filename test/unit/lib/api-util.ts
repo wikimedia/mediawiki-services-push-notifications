@@ -93,5 +93,27 @@ describe('api-util', () => {
         });
     });
 
+    describe('extractCookieDomain', () => {
+        it('host header supersedes req uri', () => {
+            const req : any = {
+                uri: 'http://do.not.extract.this.url',
+                headers: {
+                    host: 'extract.this.url'
+                }
+            };
+            assert.deepStrictEqual(api.extractCookieDomain(req), 'extract.this.url');
+        });
+        it('get req uri when host header is not present', () => {
+            const req : any = {
+                uri: 'http://extract.this.url',
+            };
+            assert.deepStrictEqual(api.extractCookieDomain(req), 'http://extract.this.url');
+        });
+        it('returns undefined in case uri and host header are not present', () => {
+            const req : any = {};
+            assert.deepStrictEqual(api.extractCookieDomain(req), undefined);
+        });
+    });
+
     after(() => nock.cleanAll());
 });
