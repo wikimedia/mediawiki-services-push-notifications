@@ -3,7 +3,6 @@ const requestLib = require('request');
 const sUtil = require('./routing');
 const Template = require('swagger-router').Template;
 const HTTPError = sUtil.HTTPError;
-
 // Debug requests for badtoken issues in beta/prod (T260247)
 requestLib.debug = true;
 
@@ -19,7 +18,12 @@ const TokenType = {
  * @return {!string} return host header if it exists
  */
 function extractCookieDomain(request) {
-    return request.headers && request.headers.host || request.uri;
+    const hostname = request.headers?.host;
+    if (!hostname) {
+        return request.uri;
+    }
+    // The cookie domain needs to be an URL formatted with a protocol
+    return `http://${hostname}`;
 }
 
 /**
@@ -40,16 +44,19 @@ function mwApiPost(app, query, headers = {}) {
             query
         }
     });
-    Object.assign(request.headers, headers);
-
-    // Use the default cookie jar
-    request.jar = app.cookieJar || true;
+    Object.assign(request.headers, headers,  app.cookies?.headers || {});
+    // Use custom cookie jar if it exists
+    request.jar = app.cookies?.jar || true;
     return preq(request).then((response) => {
-        const cookieDomain = extractCookieDomain(request);
-        if (app.cookieJar && response.headers['set-cookie'] && cookieDomain) {
-            response.headers['set-cookie'].forEach((cookie) => {
-                app.cookieJar.setCookie(requestLib.cookie(cookie, cookieDomain));
-            });
+        if (app.cookies && response.headers['set-cookie']) {
+            const cookieDomain = extractCookieDomain(request);
+            if (cookieDomain) {
+                const cookie = response.headers['set-cookie'].map((c) => {
+                    return app.cookies.jar.setCookie(c, cookieDomain);
+                });
+                // the cookies need to be passed as request headers too
+                app.cookies.headers = { cookie };
+            }
         }
         // Server error
         if (response.status < 200 || response.status > 399) {
@@ -103,10 +110,13 @@ function mwApiLogin(app) {
         throw new Error('mw_subscription_manager_username and mw_subscription_manager_password' +
             ' must be defined in the app configuration!');
     }
-    // Everytime login is called, recreate cookie jar object and expose in the app object
-    // The cookie jar will only be used when using mwApiLogin if config is enabled
+    // Everytime login is called, recreate cookie object and expose in the app object
+    // The cookie jar and headers will only be used when executing mwApiLogin and config is enabled
     if (app.conf.enable_custom_cookie_jar) {
-        app.cookieJar = requestLib.jar();
+        app.cookies = {
+            jar: requestLib.jar(),
+            headers: {}
+        };
     }
     return mwApiGetToken(app, TokenType.LOGIN).then((logintoken) => mwApiPost(
         app, {

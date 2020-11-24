@@ -48,6 +48,16 @@ class TestServiceTemplateNodeRunner extends TestRunner {
             spec: this._spec
         };
     }
+
+    // Add start stub to avoid CI error
+    start() {
+        return super.start();
+    }
+
+    // Add stop stub to avoid CI error
+    stop() {
+        return super.stop();
+    }
 }
 
 /**
