@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* FIXME: disabling the rule above because it's throwing false positives for ts enum */
 /** Types of messages we currently support */
 export enum MessageType {
     CheckEchoV1 = 'checkEchoV1',
