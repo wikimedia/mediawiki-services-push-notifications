@@ -36,7 +36,7 @@ variants:
     base: docker-registry.wikimedia.org/buster-nodejs10-slim
     node: { requirements: [] }
     includes: [prep]
-    apt: { packages: [ca-certificates=20190110] }
+    apt: { packages: [ca-certificates] }
     copies: [prep]
     entrypoint: [node, dist/server.js]
     runs:
