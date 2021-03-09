@@ -43,7 +43,7 @@
     "FCM",
     "APNs"
   ],
-  "author": "Wikimedia Service Team <services@lists.wikimedia.org>",
+  "author": "Wikimedia Product Infrastructure Team <product-infrastructure@lists.wikimedia.org>",
   "contributors": [],
   "license": "Apache-2.0",
   "bugs": {
