@@ -73,23 +73,6 @@ This is targeting push notifications on Safari desktop. To send an APNS notifica
 * Visit `/?doc#/Push notifications/post_v1_message_apns` on `push-notifications` service and trigger
   an API request after replacing the token under `deviceTokens`.
 
-#### iOS demo app
-
-A demo iOS app is available at https://github.com/wikimedia/notifications-utility-ios. The app
-can be installed on a testing device either directly via XCode or using TestFlight. The app will
-display a token which can be used to send messages through the service.
-
-To have the demo app display user-visible notifications, update the service `apns` configuration to
-include the app identifier in the list of `debug_topics`:
-
-```
-apns:
-  debug_topics:
-    - org.wikimedia.Notifications-Utility
-```
-This will modify the message payload so that the demo app displays a notification rather than
-silently processing the message.
-
 ### Production
 
 The app is expecting the `.p8` token key named `apns.p8` to exist under
