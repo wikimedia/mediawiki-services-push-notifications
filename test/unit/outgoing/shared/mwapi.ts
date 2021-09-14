@@ -5,162 +5,162 @@ import Logger from '../../../mocks/logger';
 import { sendSubscriptionDeleteRequest } from '../../../../src/outgoing/shared/mwapi';
 
 describe('unit:mwapi', () => {
-    const app = {
-        conf: {
-            mw_subscription_manager_username: 'Test user',
-            mw_subscription_manager_password: 'Test pass'
-        },
-        logger: new Logger()
-    };
+	const app = {
+		conf: {
+			mw_subscription_manager_username: 'Test user',
+			mw_subscription_manager_password: 'Test pass'
+		},
+		logger: new Logger()
+	};
 
-    before(() => api.setupApiTemplates(app));
+	before(() => api.setupApiTemplates(app));
 
-    it('sendSubscriptionDeleteRequest: success', async () => {
-        const scope = nock('https://meta.wikimedia.org')
-            .post('/w/api.php')
-            .reply(200, {
-                batchcomplete: '',
-                query: {
-                    tokens: {
-                        csrftoken: 'TOKEN+\\'
-                    }
-                }
-            })
-            .post('/w/api.php')
-            .reply(200, {
-                delete: {
-                    result: 'Success'
-                }
-            });
+	it('sendSubscriptionDeleteRequest: success', async () => {
+		const scope = nock('https://meta.wikimedia.org')
+			.post('/w/api.php')
+			.reply(200, {
+				batchcomplete: '',
+				query: {
+					tokens: {
+						csrftoken: 'TOKEN+\\'
+					}
+				}
+			})
+			.post('/w/api.php')
+			.reply(200, {
+				delete: {
+					result: 'Success'
+				}
+			});
 
-        await sendSubscriptionDeleteRequest(app, ['TOKEN']).then((rsp) => {
-            assert.deepStrictEqual(rsp.status, 200);
-        });
+		await sendSubscriptionDeleteRequest(app, ['TOKEN']).then((rsp) => {
+			assert.deepStrictEqual(rsp.status, 200);
+		});
 
-        scope.done();
-    });
+		scope.done();
+	});
 
-    it('sendSubscriptionDeleteRequest: failure', async () => {
-        const scope = nock('https://meta.wikimedia.org')
-            .post('/w/api.php')
-            .reply(200, {
-                batchcomplete: '',
-                query: {
-                    tokens: {
-                        csrftoken: 'TOKEN+\\'
-                    }
-                }
-            })
-            .post('/w/api.php')
-            .reply(200, {
-                error: {
-                    code: 'api-error-code',
-                    info: 'API error message'
-                },
-                servedby: 'mw9999'
-            });
+	it('sendSubscriptionDeleteRequest: failure', async () => {
+		const scope = nock('https://meta.wikimedia.org')
+			.post('/w/api.php')
+			.reply(200, {
+				batchcomplete: '',
+				query: {
+					tokens: {
+						csrftoken: 'TOKEN+\\'
+					}
+				}
+			})
+			.post('/w/api.php')
+			.reply(200, {
+				error: {
+					code: 'api-error-code',
+					info: 'API error message'
+				},
+				servedby: 'mw9999'
+			});
 
-        await sendSubscriptionDeleteRequest(app, ['TOKEN']).then((rsp) => {
-            // Should throw on MW API error response despite the 200 response code
-            assert.fail();
-        }).catch((err) => {
-            assert.deepStrictEqual(err.title, 'api-error-code');
-            assert.deepStrictEqual(err.detail, 'API error message');
-        });
+		await sendSubscriptionDeleteRequest(app, ['TOKEN']).then((rsp) => {
+			// Should throw on MW API error response despite the 200 response code
+			assert.fail();
+		}).catch((err) => {
+			assert.deepStrictEqual(err.title, 'api-error-code');
+			assert.deepStrictEqual(err.detail, 'API error message');
+		});
 
-        scope.done();
-    });
+		scope.done();
+	});
 
-    it('sendSubscriptionDeleteRequest: success with login', async () => {
-        const scope = nock('https://meta.wikimedia.org')
-            .post('/w/api.php')
-            .reply(200, {
-                batchcomplete: '',
-                query: {
-                    tokens: {
-                        csrftoken: '+\\'
-                    }
-                }
-            })
-            .post('/w/api.php')
-            .reply(200, {
-                batchcomplete: '',
-                query: {
-                    tokens: {
-                        logintoken: 'TOKEN+\\'
-                    }
-                }
-            })
-            .post('/w/api.php')
-            .reply(200, {
-                clientlogin: {
-                    status: 'PASS',
-                    username: 'SubscriptionManager'
-                }
-            })
-            .post('/w/api.php')
-            .reply(200, {
-                batchcomplete: '',
-                query: {
-                    tokens: {
-                        csrftoken: 'TOKEN+\\'
-                    }
-                }
-            })
-            .post('/w/api.php')
-            .reply(200, {
-                delete: {
-                    result: 'Success'
-                }
-            });
+	it('sendSubscriptionDeleteRequest: success with login', async () => {
+		const scope = nock('https://meta.wikimedia.org')
+			.post('/w/api.php')
+			.reply(200, {
+				batchcomplete: '',
+				query: {
+					tokens: {
+						csrftoken: '+\\'
+					}
+				}
+			})
+			.post('/w/api.php')
+			.reply(200, {
+				batchcomplete: '',
+				query: {
+					tokens: {
+						logintoken: 'TOKEN+\\'
+					}
+				}
+			})
+			.post('/w/api.php')
+			.reply(200, {
+				clientlogin: {
+					status: 'PASS',
+					username: 'SubscriptionManager'
+				}
+			})
+			.post('/w/api.php')
+			.reply(200, {
+				batchcomplete: '',
+				query: {
+					tokens: {
+						csrftoken: 'TOKEN+\\'
+					}
+				}
+			})
+			.post('/w/api.php')
+			.reply(200, {
+				delete: {
+					result: 'Success'
+				}
+			});
 
-        await sendSubscriptionDeleteRequest(app, ['TOKEN']).then((rsp) => {
-            assert.deepStrictEqual(rsp.status, 200);
-        });
+		await sendSubscriptionDeleteRequest(app, ['TOKEN']).then((rsp) => {
+			assert.deepStrictEqual(rsp.status, 200);
+		});
 
-        scope.done();
-    });
+		scope.done();
+	});
 
-    it('sendSubscriptionDeleteRequest: failed login', async () => {
-        const scope = nock('https://meta.wikimedia.org')
-            .post('/w/api.php')
-            .reply(200, {
-                batchcomplete: '',
-                query: {
-                    tokens: {
-                        csrftoken: '+\\'
-                    }
-                }
-            })
-            .post('/w/api.php')
-            .reply(200, {
-                batchcomplete: '',
-                query: {
-                    tokens: {
-                        logintoken: 'TOKEN+\\'
-                    }
-                }
-            })
-            .post('/w/api.php')
-            .reply(200, {
-                error: {
-                    code: 'badtoken',
-                    info: 'Invalid CSRF token.'
-                },
-                servedby: 'mw9999'
-            });
+	it('sendSubscriptionDeleteRequest: failed login', async () => {
+		const scope = nock('https://meta.wikimedia.org')
+			.post('/w/api.php')
+			.reply(200, {
+				batchcomplete: '',
+				query: {
+					tokens: {
+						csrftoken: '+\\'
+					}
+				}
+			})
+			.post('/w/api.php')
+			.reply(200, {
+				batchcomplete: '',
+				query: {
+					tokens: {
+						logintoken: 'TOKEN+\\'
+					}
+				}
+			})
+			.post('/w/api.php')
+			.reply(200, {
+				error: {
+					code: 'badtoken',
+					info: 'Invalid CSRF token.'
+				},
+				servedby: 'mw9999'
+			});
 
-        // Note: Error will not be caught and handled in BBPromise.catch();
-        try {
-            await sendSubscriptionDeleteRequest(app, ['TOKEN']).then(() => {
-                assert.fail('Should throw on login failure');
-            });
-        } catch (err) {
-            assert.ok('Error was caught');
-        }
+		// Note: Error will not be caught and handled in BBPromise.catch();
+		try {
+			await sendSubscriptionDeleteRequest(app, ['TOKEN']).then(() => {
+				assert.fail('Should throw on login failure');
+			});
+		} catch (err) {
+			assert.ok('Error was caught');
+		}
 
-        scope.done();
-    });
+		scope.done();
+	});
 
-    after(() => nock.cleanAll());
+	after(() => nock.cleanAll());
 });

@@ -12,14 +12,14 @@ export class QueueOptions {
 }
 
 function isUsingRandomFlushTimeout(options: QueueOptions): boolean {
-    return !!(options && options.flushTimeoutMs && options.flushTimeoutMs === 'random');
+	return !!(options && options.flushTimeoutMs && options.flushTimeoutMs === 'random');
 }
 
 function assertSafeNonNegativeInteger(val: any, name = 'value') {
-    assert.deepStrictEqual('number', typeof val, `${name} must be a number`);
-    assert(val <= Number.MAX_SAFE_INTEGER, `${name} must be a safe integer`);
-    assert(val >= 0, `${name} must be >= 0`);
-    assert.deepStrictEqual(val, Math.floor(val), `${name} must be an integer`);
+	assert.deepStrictEqual('number', typeof val, `${name} must be a number`);
+	assert(val <= Number.MAX_SAFE_INTEGER, `${name} must be a safe integer`);
+	assert(val >= 0, `${name} must be >= 0`);
+	assert.deepStrictEqual(val, Math.floor(val), `${name} must be an integer`);
 }
 
 /**
@@ -30,13 +30,13 @@ function assertSafeNonNegativeInteger(val: any, name = 'value') {
  * @throws AssertionError
  */
 function validateRandomFlushTimeout(options: QueueOptions): void {
-    const flushTimeoutMin = options.flushTimeoutMin;
-    const flushTimeoutMax = options.flushTimeoutMax;
-    assert(flushTimeoutMin, 'flushTimeoutMin must be defined when using random flush timeout');
-    assert(flushTimeoutMax, 'flushTimeoutMax must be defined when using random flush timeout');
-    assertSafeNonNegativeInteger(flushTimeoutMin, 'flushTimeoutMin');
-    assertSafeNonNegativeInteger(flushTimeoutMax, 'flushTimeoutMax');
-    assert(flushTimeoutMax >= flushTimeoutMin, 'flushTimeoutMax must be >= flushTimeoutMin');
+	const flushTimeoutMin = options.flushTimeoutMin;
+	const flushTimeoutMax = options.flushTimeoutMax;
+	assert(flushTimeoutMin, 'flushTimeoutMin must be defined when using random flush timeout');
+	assert(flushTimeoutMax, 'flushTimeoutMax must be defined when using random flush timeout');
+	assertSafeNonNegativeInteger(flushTimeoutMin, 'flushTimeoutMin');
+	assertSafeNonNegativeInteger(flushTimeoutMax, 'flushTimeoutMax');
+	assert(flushTimeoutMax >= flushTimeoutMin, 'flushTimeoutMax must be >= flushTimeoutMin');
 }
 
 /**
@@ -47,14 +47,14 @@ function validateRandomFlushTimeout(options: QueueOptions): void {
  * @throws AssertionError
  */
 function validateFlushTimeout(options: QueueOptions): void {
-    if (isUsingRandomFlushTimeout(options)) {
-        validateRandomFlushTimeout(options);
-    } else {
-        const flushTimeoutMs = options.flushTimeoutMs;
-        assert.deepStrictEqual('number', typeof flushTimeoutMs, 'flushTimeout must be a number ' +
+	if (isUsingRandomFlushTimeout(options)) {
+		validateRandomFlushTimeout(options);
+	} else {
+		const flushTimeoutMs = options.flushTimeoutMs;
+		assert.deepStrictEqual('number', typeof flushTimeoutMs, 'flushTimeout must be a number ' +
             'or \'random\'');
-        assertSafeNonNegativeInteger(flushTimeoutMs, 'flushTimeout');
-    }
+		assertSafeNonNegativeInteger(flushTimeoutMs, 'flushTimeout');
+	}
 }
 
 /**
@@ -64,19 +64,19 @@ function validateFlushTimeout(options: QueueOptions): void {
  * @throws AssertionError
  */
 export function validateQueueingConfig(options: QueueOptions = null): void {
-    if (!options) {
-        return;
-    }
-    if (options.flushTimeoutMs) {
-        validateFlushTimeout(options);
-    }
-    if (options.maxSize) {
-        assertSafeNonNegativeInteger(options.maxSize, 'maxSize');
-    }
+	if (!options) {
+		return;
+	}
+	if (options.flushTimeoutMs) {
+		validateFlushTimeout(options);
+	}
+	if (options.maxSize) {
+		assertSafeNonNegativeInteger(options.maxSize, 'maxSize');
+	}
 }
 
 function getRandomInt(min: number, max: number): number {
-    return Math.floor(Math.random() * (max - min)) + min;
+	return Math.floor(Math.random() * (max - min)) + min;
 }
 
 /**
@@ -87,7 +87,7 @@ function getRandomInt(min: number, max: number): number {
  * @return {!number}
  */
 function getRandomFlushTimeout(options: QueueOptions): number {
-    return getRandomInt(options.flushTimeoutMin, options.flushTimeoutMax);
+	return getRandomInt(options.flushTimeoutMin, options.flushTimeoutMax);
 }
 
 /**
@@ -99,9 +99,9 @@ function getRandomFlushTimeout(options: QueueOptions): number {
  * @return {!number}
  */
 export function getFlushTimeout(options: QueueOptions): number {
-    if (options.flushTimeoutMs === 'random') {
-        return getRandomFlushTimeout(options);
-    }
+	if (options.flushTimeoutMs === 'random') {
+		return getRandomFlushTimeout(options);
+	}
 
-    return options.flushTimeoutMs as number;
+	return options.flushTimeoutMs as number;
 }

@@ -10,27 +10,27 @@ import { mwApiGetToken, mwApiLogin, mwApiPost } from '../../lib/api-util';
  * @param {?boolean} loginRetry
  */
 export async function sendSubscriptionDeleteRequest(
-    app,
-    tokens: string[],
-    loginRetry = false
+	app,
+	tokens: string[],
+	loginRetry = false
 ): Promise<any> {
-    return mwApiGetToken(app).then((token) => {
-        if (token === '+\\') {
-            if (loginRetry) {
-                throw new Error('Received anon token after attempting to log in; aborting.');
-            }
-            return mwApiLogin(app).then(() =>
-                this.sendSubscriptionDeleteRequest(app, tokens, true));
-        }
-        const query = {
-            action: 'echopushsubscriptions',
-            command: 'delete',
-            providertoken: tokens.join('|'),
-            token
-        };
-        return mwApiPost(app, query).catch((err) => {
-            app.logger.log('error/mwapi', err);
-            throw err;
-        });
-    });
+	return mwApiGetToken(app).then((token) => {
+		if (token === '+\\') {
+			if (loginRetry) {
+				throw new Error('Received anon token after attempting to log in; aborting.');
+			}
+			return mwApiLogin(app).then(() =>
+				sendSubscriptionDeleteRequest(app, tokens, true));
+		}
+		const query = {
+			action: 'echopushsubscriptions',
+			command: 'delete',
+			providertoken: tokens.join('|'),
+			token
+		};
+		return mwApiPost(app, query).catch((err) => {
+			app.logger.log('error/mwapi', err);
+			throw err;
+		});
+	});
 }

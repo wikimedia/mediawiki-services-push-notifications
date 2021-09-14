@@ -12,22 +12,22 @@ import Queue from 'buffered-queue';
 import prometheusClient from 'prom-client';
 import { Responses } from '@wikimedia/apn';
 import {
-    getFailedTokens as getFcmFailedTokens,
-    getMulticastMessage,
-    sendMessage as sendFcmMessage
+	getFailedTokens as getFcmFailedTokens,
+	getMulticastMessage,
+	sendMessage as sendFcmMessage
 } from '../outgoing/fcm/fcm';
 import {
-    getFailedTokens as getApnsFailedTokens,
-    sendMessage as sendApnsMessage
+	getFailedTokens as getApnsFailedTokens,
+	sendMessage as sendApnsMessage
 } from '../outgoing/apns/apns';
 import * as admin from 'firebase-admin';
 import { MultiDeviceMessage, PushProvider, SingleDeviceMessage } from '../outgoing/shared/Message';
 import {
-    DEFAULT_FLUSH_TIMEOUT_MS,
-    DEFAULT_MAX_QUEUE_SIZE,
-    getFlushTimeout,
-    QueueOptions,
-    validateQueueingConfig
+	DEFAULT_FLUSH_TIMEOUT_MS,
+	DEFAULT_MAX_QUEUE_SIZE,
+	getFlushTimeout,
+	QueueOptions,
+	validateQueueingConfig
 } from '../loaders/queueConfig';
 import { sendSubscriptionDeleteRequest } from '../outgoing/shared/mwapi';
 
@@ -67,31 +67,31 @@ export const MAX_MULTICAST_RECIPIENTS = 500;
  * @param {!SingleDeviceMessage} message
  */
 function addBatchableMessage(batchedMessages: any, message: SingleDeviceMessage): void {
-    const topic = message.meta && message.meta.topic || '';
-    const dryRun = message.dryRun ? 'dryRun' : '';
-    const key = `${message.provider}:${message.type}:${topic}:${dryRun}`;
-    if (!batchedMessages[key]) {
-        batchedMessages[key] = [ new MultiDeviceMessage(
-            new Set([ message.deviceToken ]),
-            message.provider,
-            message.type,
-            message.meta,
-            message.dryRun
-        ) ];
-        return;
-    }
-    if (batchedMessages[key][batchedMessages[key].length - 1].deviceTokens.size >=
+	const topic = message.meta && message.meta.topic || '';
+	const dryRun = message.dryRun ? 'dryRun' : '';
+	const key = `${message.provider}:${message.type}:${topic}:${dryRun}`;
+	if (!batchedMessages[key]) {
+		batchedMessages[key] = [ new MultiDeviceMessage(
+			new Set([ message.deviceToken ]),
+			message.provider,
+			message.type,
+			message.meta,
+			message.dryRun
+		) ];
+		return;
+	}
+	if (batchedMessages[key][batchedMessages[key].length - 1].deviceTokens.size >=
         MAX_MULTICAST_RECIPIENTS) {
-        batchedMessages[key].push(new MultiDeviceMessage(
-            new Set([ message.deviceToken ]),
-            message.provider,
-            message.type,
-            message.meta,
-            message.dryRun
-        ));
-        return;
-    }
-    batchedMessages[key][batchedMessages[key].length - 1].deviceTokens.add(message.deviceToken);
+		batchedMessages[key].push(new MultiDeviceMessage(
+			new Set([ message.deviceToken ]),
+			message.provider,
+			message.type,
+			message.meta,
+			message.dryRun
+		));
+		return;
+	}
+	batchedMessages[key][batchedMessages[key].length - 1].deviceTokens.add(message.deviceToken);
 }
 
 /**
@@ -101,13 +101,13 @@ function addBatchableMessage(batchedMessages: any, message: SingleDeviceMessage)
  * @return {!Array<MultiDeviceMessage>}
  */
 function getBatchedMessages(messages: Array<SingleDeviceMessage>): Array<MultiDeviceMessage> {
-    const batchedMessages = {};
+	const batchedMessages = {};
 
-    messages.forEach((message: SingleDeviceMessage) => {
-        addBatchableMessage(batchedMessages, message);
-    });
+	messages.forEach((message: SingleDeviceMessage) => {
+		addBatchableMessage(batchedMessages, message);
+	});
 
-    return [].concat(...Object.values(batchedMessages));
+	return [].concat(...Object.values(batchedMessages));
 }
 
 /**
@@ -118,10 +118,10 @@ function getBatchedMessages(messages: Array<SingleDeviceMessage>): Array<MultiDe
  * @param {!MultiDeviceMessage} message
  */
 export function enqueueMessages(queue: Queue, message: MultiDeviceMessage): void {
-    message.toSingleDeviceMessages().forEach((msg) => {
-        msg.enqueueTimestamp = Date.now();
-        queue.add(msg);
-    });
+	message.toSingleDeviceMessages().forEach((msg) => {
+		msg.enqueueTimestamp = Date.now();
+		queue.add(msg);
+	});
 }
 
 /**
@@ -130,78 +130,78 @@ export function enqueueMessages(queue: Queue, message: MultiDeviceMessage): void
  * @param {!Application} app
  */
 export function init(app: any): Queue {
-    const options: QueueOptions = app.conf && app.conf.queueing || {};
-    const flushTimeoutMs = getFlushTimeout(options) || DEFAULT_FLUSH_TIMEOUT_MS;
-    const maxSize = options.maxSize || DEFAULT_MAX_QUEUE_SIZE;
-    const queue = new Queue('push', {
-        size: maxSize,
-        flushTimeout: flushTimeoutMs,
-        verbose: options.verbose
-    });
+	const options: QueueOptions = app.conf && app.conf.queueing || {};
+	const flushTimeoutMs = getFlushTimeout(options) || DEFAULT_FLUSH_TIMEOUT_MS;
+	const maxSize = options.maxSize || DEFAULT_MAX_QUEUE_SIZE;
+	const queue = new Queue('push', {
+		size: maxSize,
+		flushTimeout: flushTimeoutMs,
+		verbose: options.verbose
+	});
 
-    validateQueueingConfig(options);
+	validateQueueingConfig(options);
 
-    queue.on('flush', async (messages) => {
-        const histogram = app.metrics.makeMetric({
-            type: 'Histogram',
-            name: 'NotificationQueueTime',
-            prometheus: {
-                name: 'push_notifications_notification_queue_time',
-                help: 'Time the notification spent in the queue',
-                buckets: prometheusClient.linearBuckets(0, flushTimeoutMs / 20, 20)
-            }
-        });
+	queue.on('flush', async (messages) => {
+		const histogram = app.metrics.makeMetric({
+			type: 'Histogram',
+			name: 'NotificationQueueTime',
+			prometheus: {
+				name: 'push_notifications_notification_queue_time',
+				help: 'Time the notification spent in the queue',
+				buckets: prometheusClient.linearBuckets(0, flushTimeoutMs / 20, 20)
+			}
+		});
 
-        messages.forEach((message: SingleDeviceMessage) => {
-            histogram.observe(Date.now() - message.enqueueTimestamp);
-        });
+		messages.forEach((message: SingleDeviceMessage) => {
+			histogram.observe(Date.now() - message.enqueueTimestamp);
+		});
 
-        app.metrics.makeMetric({
-            type: 'Gauge',
-            name: 'QueueSizeOnFlush',
-            prometheus: {
-                name: 'push_notifications_queue_size_on_flush',
-                help: 'Reported size of queue on flush'
-            }
-        }).set(messages.length);
+		app.metrics.makeMetric({
+			type: 'Gauge',
+			name: 'QueueSizeOnFlush',
+			prometheus: {
+				name: 'push_notifications_queue_size_on_flush',
+				help: 'Reported size of queue on flush'
+			}
+		}).set(messages.length);
 
-        const batchedMessages = getBatchedMessages(messages);
+		const batchedMessages = getBatchedMessages(messages);
 
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore: method added by shim
-        // eslint-disable-next-line es/no-promise-all-settled
-        return Promise.allSettled(batchedMessages.map(async (message: MultiDeviceMessage) => {
-            switch (message.provider) {
-                case PushProvider.FCM: {
-                    const multicastMessage = getMulticastMessage(message);
-                    const response: BatchResponse = await sendFcmMessage(app, multicastMessage,
-                        message.dryRun);
-                    const failedTokens = getFcmFailedTokens(multicastMessage, response);
-                    if (failedTokens.length) {
-                        return sendSubscriptionDeleteRequest(app, failedTokens);
-                    }
-                    return;
-                }
-                case PushProvider.APNS: {
-                    const response: Responses = await sendApnsMessage(app, message);
-                    const failedTokens = getApnsFailedTokens(response);
-                    if (failedTokens.length) {
-                        return sendSubscriptionDeleteRequest(app, failedTokens);
-                    }
-                    return;
-                }
-                default:
-                    throw new Error(`Found unknown provider ${message.provider}`);
-            }
-        })).then((results) => {
-            const failures = results.filter((result) => result.status === 'rejected');
-            failures.forEach((failure) => {
-                app.logger.log('debug', failure.reason);
-            });
-        });
-    });
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore: method added by shim
+		// eslint-disable-next-line es/no-promise-all-settled
+		return Promise.allSettled(batchedMessages.map(async (message: MultiDeviceMessage) => {
+			switch (message.provider) {
+				case PushProvider.FCM: {
+					const multicastMessage = getMulticastMessage(message);
+					const response: BatchResponse = await sendFcmMessage(app, multicastMessage,
+						message.dryRun);
+					const failedTokens = getFcmFailedTokens(multicastMessage, response);
+					if (failedTokens.length) {
+						return sendSubscriptionDeleteRequest(app, failedTokens);
+					}
+					return;
+				}
+				case PushProvider.APNS: {
+					const response: Responses = await sendApnsMessage(app, message);
+					const failedTokens = getApnsFailedTokens(response);
+					if (failedTokens.length) {
+						return sendSubscriptionDeleteRequest(app, failedTokens);
+					}
+					return;
+				}
+				default:
+					throw new Error(`Found unknown provider ${message.provider}`);
+			}
+		})).then((results) => {
+			const failures = results.filter((result) => result.status === 'rejected');
+			failures.forEach((failure) => {
+				app.logger.log('debug', failure.reason);
+			});
+		});
+	});
 
-    app.queue = queue;
-    app.logger.log('warn/queueing',
-        `Initialized queue: max size: ${maxSize}, flush timeout (ms): ${flushTimeoutMs}`);
+	app.queue = queue;
+	app.logger.log('warn/queueing',
+		`Initialized queue: max size: ${maxSize}, flush timeout (ms): ${flushTimeoutMs}`);
 }

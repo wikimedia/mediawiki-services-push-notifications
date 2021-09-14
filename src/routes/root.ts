@@ -16,7 +16,7 @@ let app;
  * Instructs robots no indexing should occur on this domain.
  */
 router.get('/robots.txt', (req, res) => {
-    res.type('text/plain').end('User-agent: *\nDisallow: /\n');
+	res.type('text/plain').end('User-agent: *\nDisallow: /\n');
 });
 
 const DOC_CSP = "default-src 'none'; " +
@@ -24,19 +24,19 @@ const DOC_CSP = "default-src 'none'; " +
     "style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self';";
 
 function getSwaggerUI(req, res) {
-    return swaggerUi.serve(app.info.name, req.query.path || '/index.html')
-    .then(({ contentType, body }) => {
-        res.header('content-type', contentType);
-        res.header('content-security-policy', DOC_CSP);
-        res.header('x-content-security-policy', DOC_CSP);
-        res.header('x-webkit-csp', DOC_CSP);
-        res.send(body.toString());
-    })
-    .catch({ code: 'ENOENT' }, () => {
-        res.status(404)
-            .type('not_found')
-            .send('not found');
-    });
+	return swaggerUi.serve(app.info.name, req.query.path || '/index.html')
+		.then(({ contentType, body }) => {
+			res.header('content-type', contentType);
+			res.header('content-security-policy', DOC_CSP);
+			res.header('x-content-security-policy', DOC_CSP);
+			res.header('x-webkit-csp', DOC_CSP);
+			res.send(body.toString());
+		})
+		.catch({ code: 'ENOENT' }, () => {
+			res.status(404)
+				.type('not_found')
+				.send('not found');
+		});
 }
 
 /**
@@ -45,23 +45,23 @@ function getSwaggerUI(req, res) {
  * parameter is given, otherwise lets the next middleware handle it
  */
 router.get('/', (req, res, next) => {
-    if ({}.hasOwnProperty.call(req.query || {}, 'spec')) {
-        res.json(app.conf.spec);
-    } else if ({}.hasOwnProperty.call(req.query || {}, 'doc')) {
-        return getSwaggerUI(req, res);
-    } else {
-        next();
-    }
+	if ({}.hasOwnProperty.call(req.query || {}, 'spec')) {
+		res.json(app.conf.spec);
+	} else if ({}.hasOwnProperty.call(req.query || {}, 'doc')) {
+		return getSwaggerUI(req, res);
+	} else {
+		next();
+	}
 });
 
 module.exports = (appObj) => {
-    app = appObj;
+	app = appObj;
 
-    return {
-        path: '/',
-        skip_domain: true,
-        router
-    };
+	return {
+		path: '/',
+		skip_domain: true,
+		router
+	};
 };
 
 export {};

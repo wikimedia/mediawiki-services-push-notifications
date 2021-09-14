@@ -12,16 +12,16 @@ import * as loaders from './loaders';
  * @return {BBPromise} the promise resolving to the app object
  */
 function initApp(options) {
-    // the main application object
-    const app: express.Application = express();
+	// the main application object
+	const app: express.Application = express();
 
-    // get the options and make them available in the app
-    app.logger = options.logger;    // the logging device
-    app.metrics = options.metrics;  // the metrics
-    app.conf = options.config;      // this app's config options
-    app.info = packageInfo;         // this app's package info
+	// get the options and make them available in the app
+	app.logger = options.logger;    // the logging device
+	app.metrics = options.metrics;  // the metrics
+	app.conf = options.config;      // this app's config options
+	app.info = packageInfo;         // this app's package info
 
-    return loaders.init(app);
+	return loaders.init(app);
 }
 
 /**
@@ -31,30 +31,30 @@ function initApp(options) {
  * @return {BBPromise} a promise creating the web server
  */
 function createServer(app) {
-    // return a promise which creates an HTTP server,
-    // attaches the app to it, and starts accepting
-    // incoming client requests
-    let server;
-    return new BBPromise((resolve) => {
-        server = http.createServer(app).listen(
-            app.conf.port,
-            app.conf.interface,
-            resolve
-        );
-        server = addShutdown(server);
-    }).then(() => {
-        app.logger.log('info',
-            `Worker ${process.pid} listening on ${app.conf.interface || '*'}:${app.conf.port}`);
+	// return a promise which creates an HTTP server,
+	// attaches the app to it, and starts accepting
+	// incoming client requests
+	let server;
+	return new BBPromise((resolve) => {
+		server = http.createServer(app).listen(
+			app.conf.port,
+			app.conf.interface,
+			resolve
+		);
+		server = addShutdown(server);
+	}).then(() => {
+		app.logger.log('info',
+			`Worker ${process.pid} listening on ${app.conf.interface || '*'}:${app.conf.port}`);
 
-        // Don't delay incomplete packets for 40ms (Linux default) on
-        // pipelined HTTP sockets. We write in large chunks or buffers, so
-        // lack of coalescing should not be an issue here.
-        server.on('connection', (socket) => {
-            socket.setNoDelay(true);
-        });
+		// Don't delay incomplete packets for 40ms (Linux default) on
+		// pipelined HTTP sockets. We write in large chunks or buffers, so
+		// lack of coalescing should not be an issue here.
+		server.on('connection', (socket) => {
+			socket.setNoDelay(true);
+		});
 
-        return server;
-    });
+		return server;
+	});
 }
 
 /**
@@ -67,7 +67,7 @@ function createServer(app) {
  * @return {BBPromise} HTTP server
  */
 module.exports = (options) => {
-    return initApp(options).then(createServer);
+	return initApp(options).then(createServer);
 };
 
 export {};

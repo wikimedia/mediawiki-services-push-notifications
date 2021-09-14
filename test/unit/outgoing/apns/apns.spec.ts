@@ -1,8 +1,8 @@
 import { sendMessage } from '../../../../src/outgoing/apns/apns';
 import {
-    MessageType,
-    MultiDeviceMessage,
-    PushProvider
+	MessageType,
+	MultiDeviceMessage,
+	PushProvider
 } from '../../../../src/outgoing/shared/Message';
 import assert from '../../../utils/assert';
 import * as nodeAssert from 'assert';

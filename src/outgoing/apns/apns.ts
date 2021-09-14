@@ -24,19 +24,19 @@ interface ProviderOptionsProxy {
  * @return {!Proxy}
  */
 function getProxy(proxyURL: string): Proxy {
-    const proxy = new url.URL(proxyURL);
-    const knownPorts = { 'http:': 80, 'https:': 443 };
+	const proxy = new url.URL(proxyURL);
+	const knownPorts = { 'http:': 80, 'https:': 443 };
 
-    // For known protocols node URL parse omits the port
-    if (!proxy.port) {
-        if (proxy.protocol in knownPorts) {
-            return { host: proxy.hostname, port: knownPorts[proxy.protocol] };
-        } else {
-            throw new Error('Proxy port is missing and protocol not known');
-        }
-    }
+	// For known protocols node URL parse omits the port
+	if (!proxy.port) {
+		if (proxy.protocol in knownPorts) {
+			return { host: proxy.hostname, port: knownPorts[proxy.protocol] };
+		} else {
+			throw new Error('Proxy port is missing and protocol not known');
+		}
+	}
 
-    return { host: proxy.hostname, port: parseInt(proxy.port) };
+	return { host: proxy.hostname, port: parseInt(proxy.port) };
 }
 
 /**
@@ -48,34 +48,34 @@ function getProxy(proxyURL: string): Proxy {
  * @return {ProviderOptions}
  */
 function getOptions(conf): ProviderOptions {
-    let options: ProviderOptions & ProviderOptionsProxy = {};
+	let options: ProviderOptions & ProviderOptionsProxy = {};
 
-    options = { production: conf.apns.production ?? false };
+	options = { production: conf.apns.production ?? false };
 
-    if (conf.proxy) {
-        options = {
-            ...options,
-            proxy: getProxy(conf.proxy)
-        };
-    }
+	if (conf.proxy) {
+		options = {
+			...options,
+			proxy: getProxy(conf.proxy)
+		};
+	}
 
-    if (conf.apns.token) {
-        return {
-            ...options, ...{
-                token: {
-                    key: conf.apns.token.key,
-                    keyId: conf.apns.token.keyId,
-                    teamId: conf.apns.token.teamId
-                }
-            }
-        };
-    }
+	if (conf.apns.token) {
+		return {
+			...options, ...{
+				token: {
+					key: conf.apns.token.key,
+					keyId: conf.apns.token.keyId,
+					teamId: conf.apns.token.teamId
+				}
+			}
+		};
+	}
 
-    return {
-        ...options, ...{
-            pfx: conf.apns.cert
-        }
-    };
+	return {
+		...options, ...{
+			pfx: conf.apns.cert
+		}
+	};
 }
 
 /**
@@ -84,13 +84,13 @@ function getOptions(conf): ProviderOptions {
  * @param {!Application} app Express app
  */
 function init(app: Application): void {
-    if (!apn) {
-        if (app.conf.apns.mock) {
-            apn = new MockProvider();
-        } else {
-            apn = new Provider(getOptions(app.conf));
-        }
-    }
+	if (!apn) {
+		if (app.conf.apns.mock) {
+			apn = new MockProvider();
+		} else {
+			apn = new Provider(getOptions(app.conf));
+		}
+	}
 }
 
 /**
@@ -136,35 +136,35 @@ export async function sendMessage(app: Application, message: MultiDeviceMessage)
     app.logger.log('debug/apns', `Successfully sent ${(response.sent.length)} messages; ` +
         `${response.failed.length} messages failed`);
 
-    app.metrics.makeMetric(transactionHistogramArgs).observe(Date.now() - transactionStart);
+	app.metrics.makeMetric(transactionHistogramArgs).observe(Date.now() - transactionStart);
 
-    const successCount = response.sent.length;
-    app.metrics.makeMetric({
-        type: 'Counter',
-        name: 'APNSSendSuccess',
-        prometheus: {
-            name: 'push_notifications_apns_send_success',
-            help: 'Count of successful APNS notifications sent'
-        }
-    }).increment(
-        successCount === null || successCount === undefined ? 0 : successCount
-    );
+	const successCount = response.sent.length;
+	app.metrics.makeMetric({
+		type: 'Counter',
+		name: 'APNSSendSuccess',
+		prometheus: {
+			name: 'push_notifications_apns_send_success',
+			help: 'Count of successful APNS notifications sent'
+		}
+	}).increment(
+		successCount === null || successCount === undefined ? 0 : successCount
+	);
 
-    const failureCount = response.failed.length;
-    app.metrics.makeMetric({
-        type: 'Counter',
-        name: 'APNSSendFailure',
-        prometheus: {
-            name: 'push_notifications_apns_send_failure',
-            help: 'Count of failed APNS notifications sent'
-        }
-    }).increment(
-        failureCount === null || failureCount === undefined ? 0 : failureCount
-    );
+	const failureCount = response.failed.length;
+	app.metrics.makeMetric({
+		type: 'Counter',
+		name: 'APNSSendFailure',
+		prometheus: {
+			name: 'push_notifications_apns_send_failure',
+			help: 'Count of failed APNS notifications sent'
+		}
+	}).increment(
+		failureCount === null || failureCount === undefined ? 0 : failureCount
+	);
 
-    return response;
+	return response;
 }
 
 export function getFailedTokens(response: Responses): string[] {
-    return response.failed.map((rsp) => rsp.device);
+	return response.failed.map((rsp) => rsp.device);
 }

@@ -9,5 +9,5 @@ import { initCommonConfig } from './commonConfig';
  * @return {BBPromise} the promise resolving to the app object
  */
 export function loadConfig(app) {
-    return initCommonConfig(app);
+	return initCommonConfig(app);
 }
