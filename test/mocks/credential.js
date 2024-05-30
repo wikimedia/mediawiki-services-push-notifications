@@ -1,12 +1,14 @@
+'use strict';
+
 /**
  * ServiceAccountCredential mock to be used by firebase admin library
  */
 class ServiceAccountCredential {
 	/**
-     * getAccessToken mock
-     *
-     * @return {{access_token: string, expires_in: number}}
-     */
+	 * getAccessToken mock
+	 *
+	 * @return {{access_token: string, expires_in: number}}
+	 */
 	getAccessToken() {
 		return {
 			access_token: 'TOKEN',

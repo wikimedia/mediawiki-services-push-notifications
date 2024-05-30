@@ -1,5 +1,5 @@
 version: v4
-base: docker-registry.wikimedia.org/nodejs12-slim
+base: docker-registry.wikimedia.org/nodejs18-slim
 lives:
   in: /srv/service
 runs:
@@ -7,9 +7,9 @@ runs:
 
 variants:
   all-dependencies:
-    base: docker-registry.wikimedia.org/nodejs12-devel
+    base: docker-registry.wikimedia.org/nodejs18-devel
     copies: [local]
-    apt: { packages: [git, build-essential, python, pkg-config] }
+    apt: { packages: [git, build-essential, python3, pkg-config] }
     node: { requirements: [package.json, package-lock.json] }
     runs: { environment: { LINK: g++ } }
   build:
@@ -33,7 +33,7 @@ variants:
         destination: /srv/service/dist
     node: { env: production }
   production:
-    base: docker-registry.wikimedia.org/nodejs12-slim
+    base: docker-registry.wikimedia.org/nodejs18-slim
     node: { requirements: [] }
     includes: [prep]
     apt: { packages: [ca-certificates] }
@@ -43,7 +43,7 @@ variants:
       environment:
         GOOGLE_APPLICATION_CREDENTIALS: /etc/mediawiki-services-push-notifications/google-application-credentials.json
   codehealth:
-    base: docker-registry.wikimedia.org/releng/sonar-scanner:1.0.1
+    base: docker-registry.wikimedia.org/releng/sonar-scanner:4.6.0.2311-s3
     copies: [all-dependencies]
     runs:
       environment: { SONAR_API_KEY: "SONAR_API_KEY" }

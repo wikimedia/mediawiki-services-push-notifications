@@ -3,16 +3,10 @@
     "eslint:recommended",
     "plugin:@typescript-eslint/eslint-recommended",
     "plugin:@typescript-eslint/recommended",
-    "wikimedia/server",
-    "wikimedia/node",
-    "wikimedia/language/es2017"
+    "wikimedia/server"
   ],
   "plugins": ["json", "jsdoc"],
   "parser": "@typescript-eslint/parser",
-  "parserOptions": {
-    "ecmaVersion": 2017,
-    "sourceType": "module"
-  },
   "rules": {
     "camelcase": [
       "error",
@@ -27,7 +21,12 @@
         "args": "none"
       }
     ],
-    "space-in-parens": ["error", "never"],
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        "args": "none"
+      }
+    ],
     "computed-property-spacing": "off",
     "no-multi-spaces": "off",
     "prefer-const": "error",
@@ -39,7 +38,9 @@
     "@typescript-eslint/no-var-requires": "off",
     "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/explicit-function-return-type": "off",
-    "@typescript-eslint/camelcase": "off"
+    "@typescript-eslint/camelcase": "off",
+    "es-x/no-optional-chaining": "off",
+    "es-x/no-class-fields": "off"
   },
   "settings": {
     "node": {

@@ -1,3 +1,6 @@
+'use strict';
+
+import { Express } from 'express';
 import { mwApiGetToken, mwApiLogin, mwApiPost } from '../../lib/api-util';
 
 /**
@@ -5,32 +8,35 @@ import { mwApiGetToken, mwApiLogin, mwApiPost } from '../../lib/api-util';
  * tokens.
  * Intended for use when provider APIs identify tokens as invalid.
  *
- * @param {!Application} app
+ * @param {!Express.Application} app
  * @param {!Array<string>} tokens
  * @param {?boolean} loginRetry
+ * @return {!Promise}
  */
 export async function sendSubscriptionDeleteRequest(
 	app,
 	tokens: string[],
 	loginRetry = false
 ): Promise<any> {
-	return mwApiGetToken(app).then((token) => {
-		if (token === '+\\') {
-			if (loginRetry) {
-				throw new Error('Received anon token after attempting to log in; aborting.');
+	return mwApiGetToken( app ).then( ( token ) => {
+		// eslint-disable-next-line security/detect-possible-timing-attacks
+		if ( token === '+\\' ) {
+			if ( loginRetry ) {
+				throw new Error( 'Received anon token after attempting to log in; aborting.' );
 			}
-			return mwApiLogin(app).then(() =>
-				sendSubscriptionDeleteRequest(app, tokens, true));
+			return mwApiLogin( app ).then(
+				() => sendSubscriptionDeleteRequest( app, tokens, true )
+			);
 		}
 		const query = {
 			action: 'echopushsubscriptions',
 			command: 'delete',
-			providertoken: tokens.join('|'),
+			providertoken: tokens.join( '|' ),
 			token
 		};
-		return mwApiPost(app, query).catch((err) => {
-			app.logger.log('error/mwapi', err);
+		return mwApiPost( app, query ).catch( ( err ) => {
+			app.logger.log( 'error/mwapi', err );
 			throw err;
-		});
-	});
+		} );
+	} );
 }

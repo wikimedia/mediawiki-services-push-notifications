@@ -1,3 +1,5 @@
+'use strict';
+
 import { Provider, ProviderOptions, Notification, Responses } from '@wikimedia/apn';
 import { Provider as MockProvider } from '@wikimedia/apn/mock';
 import { MultiDeviceMessage } from '../shared/Message';
@@ -23,20 +25,20 @@ interface ProviderOptionsProxy {
  * @param {!string} proxyURL
  * @return {!Proxy}
  */
-function getProxy(proxyURL: string): Proxy {
-	const proxy = new url.URL(proxyURL);
+function getProxy( proxyURL: string ): Proxy {
+	const proxy = new url.URL( proxyURL );
 	const knownPorts = { 'http:': 80, 'https:': 443 };
 
 	// For known protocols node URL parse omits the port
-	if (!proxy.port) {
-		if (proxy.protocol in knownPorts) {
-			return { host: proxy.hostname, port: knownPorts[proxy.protocol] };
+	if ( !proxy.port ) {
+		if ( proxy.protocol in knownPorts ) {
+			return { host: proxy.hostname, port: knownPorts[ proxy.protocol ] };
 		} else {
-			throw new Error('Proxy port is missing and protocol not known');
+			throw new Error( 'Proxy port is missing and protocol not known' );
 		}
 	}
 
-	return { host: proxy.hostname, port: parseInt(proxy.port) };
+	return { host: proxy.hostname, port: parseInt( proxy.port ) };
 }
 
 /**
@@ -47,19 +49,19 @@ function getProxy(proxyURL: string): Proxy {
  * @param {*} conf
  * @return {ProviderOptions}
  */
-function getOptions(conf): ProviderOptions {
+function getOptions( conf ): ProviderOptions {
 	let options: ProviderOptions & ProviderOptionsProxy = {};
 
-	options = { production: conf.apns.production ?? false };
+	options = { production: conf.apns.production || false };
 
-	if (conf.proxy) {
+	if ( conf.proxy ) {
 		options = {
 			...options,
-			proxy: getProxy(conf.proxy)
+			proxy: getProxy( conf.proxy )
 		};
 	}
 
-	if (conf.apns.token) {
+	if ( conf.apns.token ) {
 		return {
 			...options, ...{
 				token: {
@@ -83,88 +85,89 @@ function getOptions(conf): ProviderOptions {
  *
  * @param {!Application} app Express app
  */
-function init(app: Application): void {
-	if (!apn) {
-		if (app.conf.apns.mock) {
+function init( app: Application ): void {
+	if ( !apn ) {
+		if ( app.conf.apns.mock ) {
 			apn = new MockProvider();
 		} else {
-			apn = new Provider(getOptions(app.conf));
+			apn = new Provider( getOptions( app.conf ) );
 		}
 	}
 }
 
 /**
- * Send notification to APNS. The APNS provider is loaded and destroyed during the sendMessage execution
- * and not loaded during the app init to avoid memory leak T263058
+ * Send notification to APNS. The APNS provider is loaded and destroyed
+ * during the sendMessage execution and not loaded during the app init to
+ * avoid memory leak T263058
  *
  * @param {!Application} app
  * @param {!MultiDeviceMessage} message Notification to be pushed to device
  * @return {!Promise<Responses>}
  */
-export async function sendMessage(app: Application, message: MultiDeviceMessage):
+export async function sendMessage( app: Application, message: MultiDeviceMessage ):
     Promise<Responses> {
-    init(app);
-    const transactionHistogramArgs = {
-        type: 'Histogram',
-        name: 'APNSTransactionHistogram',
-        prometheus: {
-            name: 'push_notifications_apns_transaction_histogram',
-            help: 'Time spent on a transaction with the APNS service',
-            buckets: prometheusClient.exponentialBuckets(0.005, 2, 15)
-        }
-    };
-    const transactionStart = Date.now();
+	init( app );
+	const transactionHistogramArgs = {
+		type: 'Histogram',
+		name: 'APNSTransactionHistogram',
+		prometheus: {
+			name: 'push_notifications_apns_transaction_histogram',
+			help: 'Time spent on a transaction with the APNS service',
+			buckets: prometheusClient.exponentialBuckets( 0.005, 2, 15 )
+		}
+	};
+	const transactionStart = Date.now();
 
-    if (message.dryRun) {
-        const responseMessage: Responses = {
-            sent: [{ device: 'dryRun' }],
-            failed: []
-        };
-        app.logger.log('debug/apns', JSON.stringify(message));
-        app.metrics.makeMetric(transactionHistogramArgs).observe(Date.now() - transactionStart);
-        return responseMessage;
-    }
+	if ( message.dryRun ) {
+		const responseMessage: Responses = {
+			sent: [ { device: 'dryRun' } ],
+			failed: []
+		};
+		app.logger.log( 'debug/apns', JSON.stringify( message ) );
+		app.metrics.makeMetric( transactionHistogramArgs ).observe( Date.now() - transactionStart );
+		return responseMessage;
+	}
 
-    const notification = new Notification();
-    notification.payload = { data: { type: message.type } };
-    notification.threadId = message.type;
-    notification.topic = message.meta.topic;
-    notification.alert = message.type;
-    notification.mutableContent = true;
-    const response: Responses = await apn.send(notification, [...message.deviceTokens]);
-    apn.shutdown();
-    app.logger.log('debug/apns', `Successfully sent ${(response.sent.length)} messages; ` +
-        `${response.failed.length} messages failed`);
+	const notification = new Notification();
+	notification.payload = { data: { type: message.type } };
+	notification.threadId = message.type;
+	notification.topic = message.meta.topic;
+	notification.alert = message.type;
+	notification.mutableContent = true;
+	const response: Responses = await apn.send( notification, [ ...message.deviceTokens ] );
+	apn.shutdown();
+	app.logger.log( 'debug/apns', `Successfully sent ${ ( response.sent.length ) } messages; ` +
+        `${ response.failed.length } messages failed` );
 
-	app.metrics.makeMetric(transactionHistogramArgs).observe(Date.now() - transactionStart);
+	app.metrics.makeMetric( transactionHistogramArgs ).observe( Date.now() - transactionStart );
 
 	const successCount = response.sent.length;
-	app.metrics.makeMetric({
+	app.metrics.makeMetric( {
 		type: 'Counter',
 		name: 'APNSSendSuccess',
 		prometheus: {
 			name: 'push_notifications_apns_send_success',
 			help: 'Count of successful APNS notifications sent'
 		}
-	}).increment(
+	} ).increment(
 		successCount === null || successCount === undefined ? 0 : successCount
 	);
 
 	const failureCount = response.failed.length;
-	app.metrics.makeMetric({
+	app.metrics.makeMetric( {
 		type: 'Counter',
 		name: 'APNSSendFailure',
 		prometheus: {
 			name: 'push_notifications_apns_send_failure',
 			help: 'Count of failed APNS notifications sent'
 		}
-	}).increment(
+	} ).increment(
 		failureCount === null || failureCount === undefined ? 0 : failureCount
 	);
 
 	return response;
 }
 
-export function getFailedTokens(response: Responses): string[] {
-	return response.failed.map((rsp) => rsp.device);
+export function getFailedTokens( response: Responses ): string[] {
+	return response.failed.map( ( rsp ) => rsp.device );
 }

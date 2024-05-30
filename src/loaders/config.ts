@@ -1,3 +1,6 @@
+'use strict';
+import { Express } from 'express';
+import Promise from 'bluebird';
 import { initCommonConfig } from './commonConfig';
 
 /**
@@ -5,9 +8,9 @@ import { initCommonConfig } from './commonConfig';
  *
  * Add service-specific configuration here.
  *
- * @param {Express} app Express application
- * @return {BBPromise} the promise resolving to the app object
+ * @param {Express.Application} app Express application
+ * @return {Promise} the promise resolving to the app object
  */
-export function loadConfig(app) {
-	return initCommonConfig(app);
+export function loadConfig( app ) {
+	return initCommonConfig( app );
 }

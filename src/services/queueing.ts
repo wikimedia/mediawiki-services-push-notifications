@@ -1,3 +1,5 @@
+'use strict';
+
 /**
  * The purpose of this module is to provide means by which to increase the difficulty of
  * inferring connections between on-wiki actions and traffic on the public internet, in order to
@@ -8,6 +10,7 @@
  * timeouts are randomized, each worker node will have a different random flush timeout per
  * notification provider and type.
  */
+import { Express } from 'express';
 import Queue from 'buffered-queue';
 import prometheusClient from 'prom-client';
 import { Responses } from '@wikimedia/apn';
@@ -66,13 +69,13 @@ export const MAX_MULTICAST_RECIPIENTS = 500;
  * @param {!any} batchedMessages
  * @param {!SingleDeviceMessage} message
  */
-function addBatchableMessage(batchedMessages: any, message: SingleDeviceMessage): void {
+function addBatchableMessage( batchedMessages: any, message: SingleDeviceMessage ): void {
 	const topic = message.meta && message.meta.topic || '';
 	const dryRun = message.dryRun ? 'dryRun' : '';
-	const key = `${message.provider}:${message.type}:${topic}:${dryRun}`;
-	if (!batchedMessages[key]) {
-		batchedMessages[key] = [ new MultiDeviceMessage(
-			new Set([ message.deviceToken ]),
+	const key = `${ message.provider }:${ message.type }:${ topic }:${ dryRun }`;
+	if ( !batchedMessages[ key ] ) {
+		batchedMessages[ key ] = [ new MultiDeviceMessage(
+			new Set( [ message.deviceToken ] ),
 			message.provider,
 			message.type,
 			message.meta,
@@ -80,18 +83,20 @@ function addBatchableMessage(batchedMessages: any, message: SingleDeviceMessage)
 		) ];
 		return;
 	}
-	if (batchedMessages[key][batchedMessages[key].length - 1].deviceTokens.size >=
-        MAX_MULTICAST_RECIPIENTS) {
-		batchedMessages[key].push(new MultiDeviceMessage(
-			new Set([ message.deviceToken ]),
+	if ( batchedMessages[ key ][ batchedMessages[ key ].length - 1 ].deviceTokens.size >=
+        MAX_MULTICAST_RECIPIENTS ) {
+		batchedMessages[ key ].push( new MultiDeviceMessage(
+			new Set( [ message.deviceToken ] ),
 			message.provider,
 			message.type,
 			message.meta,
 			message.dryRun
-		));
+		) );
 		return;
 	}
-	batchedMessages[key][batchedMessages[key].length - 1].deviceTokens.add(message.deviceToken);
+	batchedMessages[ key ][ batchedMessages[ key ].length - 1 ].deviceTokens.add(
+		message.deviceToken
+	);
 }
 
 /**
@@ -100,14 +105,14 @@ function addBatchableMessage(batchedMessages: any, message: SingleDeviceMessage)
  * @param {!Array<SingleDeviceMessage>} messages
  * @return {!Array<MultiDeviceMessage>}
  */
-function getBatchedMessages(messages: Array<SingleDeviceMessage>): Array<MultiDeviceMessage> {
+function getBatchedMessages( messages: Array<SingleDeviceMessage> ): Array<MultiDeviceMessage> {
 	const batchedMessages = {};
 
-	messages.forEach((message: SingleDeviceMessage) => {
-		addBatchableMessage(batchedMessages, message);
-	});
+	messages.forEach( ( message: SingleDeviceMessage ) => {
+		addBatchableMessage( batchedMessages, message );
+	} );
 
-	return [].concat(...Object.values(batchedMessages));
+	return [].concat( ...Object.values( batchedMessages ) );
 }
 
 /**
@@ -117,91 +122,92 @@ function getBatchedMessages(messages: Array<SingleDeviceMessage>): Array<MultiDe
  * @param {!Queue} queue the app's message queue
  * @param {!MultiDeviceMessage} message
  */
-export function enqueueMessages(queue: Queue, message: MultiDeviceMessage): void {
-	message.toSingleDeviceMessages().forEach((msg) => {
+export function enqueueMessages( queue: Queue, message: MultiDeviceMessage ): void {
+	message.toSingleDeviceMessages().forEach( ( msg ) => {
 		msg.enqueueTimestamp = Date.now();
-		queue.add(msg);
-	});
+		queue.add( msg );
+	} );
 }
 
 /**
  * Initialize and return a queue for the provider and message type.
  *
- * @param {!Application} app
+ * @param {!Express.Application} app
  */
-export function init(app: any): Queue {
+export function init( app: any ): Queue {
 	const options: QueueOptions = app.conf && app.conf.queueing || {};
-	const flushTimeoutMs = getFlushTimeout(options) || DEFAULT_FLUSH_TIMEOUT_MS;
+	const flushTimeoutMs = getFlushTimeout( options ) || DEFAULT_FLUSH_TIMEOUT_MS;
 	const maxSize = options.maxSize || DEFAULT_MAX_QUEUE_SIZE;
-	const queue = new Queue('push', {
+	const queue = new Queue( 'push', {
 		size: maxSize,
 		flushTimeout: flushTimeoutMs,
 		verbose: options.verbose
-	});
+	} );
 
-	validateQueueingConfig(options);
+	validateQueueingConfig( options );
 
-	queue.on('flush', async (messages) => {
-		const histogram = app.metrics.makeMetric({
+	queue.on( 'flush', async ( messages ) => {
+		const histogram = app.metrics.makeMetric( {
 			type: 'Histogram',
 			name: 'NotificationQueueTime',
 			prometheus: {
 				name: 'push_notifications_notification_queue_time',
 				help: 'Time the notification spent in the queue',
-				buckets: prometheusClient.linearBuckets(0, flushTimeoutMs / 20, 20)
+				buckets: prometheusClient.linearBuckets( 0, flushTimeoutMs / 20, 20 )
 			}
-		});
+		} );
 
-		messages.forEach((message: SingleDeviceMessage) => {
-			histogram.observe(Date.now() - message.enqueueTimestamp);
-		});
+		messages.forEach( ( message: SingleDeviceMessage ) => {
+			histogram.observe( Date.now() - message.enqueueTimestamp );
+		} );
 
-		app.metrics.makeMetric({
+		app.metrics.makeMetric( {
 			type: 'Gauge',
 			name: 'QueueSizeOnFlush',
 			prometheus: {
 				name: 'push_notifications_queue_size_on_flush',
 				help: 'Reported size of queue on flush'
 			}
-		}).set(messages.length);
+		} ).set( messages.length );
 
-		const batchedMessages = getBatchedMessages(messages);
+		const batchedMessages = getBatchedMessages( messages );
 
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore: method added by shim
-		// eslint-disable-next-line es/no-promise-all-settled
+		// eslint-disable-next-line
 		return Promise.allSettled(batchedMessages.map(async (message: MultiDeviceMessage) => {
-			switch (message.provider) {
+			switch ( message.provider ) {
 				case PushProvider.FCM: {
-					const multicastMessage = getMulticastMessage(message);
-					const response: BatchResponse = await sendFcmMessage(app, multicastMessage,
-						message.dryRun);
-					const failedTokens = getFcmFailedTokens(multicastMessage, response);
-					if (failedTokens.length) {
-						return sendSubscriptionDeleteRequest(app, failedTokens);
+					const multicastMessage = getMulticastMessage( message );
+					const response: BatchResponse = await sendFcmMessage( app, multicastMessage,
+						message.dryRun );
+					const failedTokens = getFcmFailedTokens( multicastMessage, response );
+					if ( failedTokens.length ) {
+						return sendSubscriptionDeleteRequest( app, failedTokens );
 					}
 					return;
 				}
 				case PushProvider.APNS: {
-					const response: Responses = await sendApnsMessage(app, message);
-					const failedTokens = getApnsFailedTokens(response);
-					if (failedTokens.length) {
-						return sendSubscriptionDeleteRequest(app, failedTokens);
+					const response: Responses = await sendApnsMessage( app, message );
+					const failedTokens = getApnsFailedTokens( response );
+					if ( failedTokens.length ) {
+						return sendSubscriptionDeleteRequest( app, failedTokens );
 					}
 					return;
 				}
 				default:
-					throw new Error(`Found unknown provider ${message.provider}`);
+					throw new Error( `Found unknown provider ${ message.provider }` );
 			}
-		})).then((results) => {
-			const failures = results.filter((result) => result.status === 'rejected');
-			failures.forEach((failure) => {
-				app.logger.log('debug', failure.reason);
-			});
-		});
-	});
+		} ) ).then( ( results ) => {
+			const failures = results.filter( ( result ) => result.status === 'rejected' );
+			failures.forEach( ( failure ) => {
+				// @ts-expect-error PromiseSettledResult type not inferred, 'reason' exists
+				app.logger.log( 'debug', failure.reason );
+			} );
+		} );
+	} );
 
 	app.queue = queue;
-	app.logger.log('warn/queueing',
-		`Initialized queue: max size: ${maxSize}, flush timeout (ms): ${flushTimeoutMs}`);
+	app.logger.log( 'warn/queueing',
+		`Initialized queue: max size: ${ maxSize }, flush timeout (ms): ${ flushTimeoutMs }` );
 }

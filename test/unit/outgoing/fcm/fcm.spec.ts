@@ -1,3 +1,5 @@
+'use strict';
+
 import * as sinon from 'sinon';
 import nock from 'nock';
 import * as MockCredential from '../../../mocks/credential';
@@ -10,10 +12,10 @@ import {
 	PushProvider
 } from '../../../../src/outgoing/shared/Message';
 
-const { createMultipartPayload } = require('../../../utils/fcm.ts');
-const makeMetrics = require('service-runner/lib/metrics');
+const { createMultipartPayload } = require( '../../../utils/fcm.ts' );
+const makeMetrics = require( 'service-runner/lib/metrics' );
 
-describe('unit:FCM', () => {
+describe( 'unit:FCM', () => {
 	const logger = new Logger();
 	const app: any = {
 		conf: { apns: { mock: true } },
@@ -21,43 +23,45 @@ describe('unit:FCM', () => {
 	};
 	let adminCredentialStub, scope;
 
-	before(async () => {
-		adminCredentialStub = sinon.stub(admin.credential, 'applicationDefault').callsFake(MockCredential.applicationDefault);
-		/** The service creates an app when loading FCM
-         * we need to delete and re-initialize FCM app */
-		if (admin.apps.length) {
+	before( async () => {
+		adminCredentialStub = sinon.stub( admin.credential, 'applicationDefault' ).callsFake( MockCredential.applicationDefault );
+		/**
+		 * The service creates an app when loading FCM
+		 * we need to delete and re-initialize FCM app
+		 */
+		if ( admin.apps.length ) {
 			await admin.app().delete();
 		}
-		admin.initializeApp({ credential: admin.credential.applicationDefault(), projectId: 'fir-test' });
-		scope = nock('https://fcm.googleapis.com')
-			.post('/batch')
-			.reply(200, createMultipartPayload(), {
+		admin.initializeApp( { credential: admin.credential.applicationDefault(), projectId: 'fir-test' } );
+		scope = nock( 'https://fcm.googleapis.com' )
+			.post( '/batch' )
+			.reply( 200, createMultipartPayload(), {
 				'Content-type': 'multipart/mixed; boundary=boundary'
-			});
-		init(app);
-	});
+			} );
+		init( app );
+	} );
 
-	after(async () => {
+	after( async () => {
 		adminCredentialStub.restore();
 		// Delete mocked FCM app otherwise mocha will hang
 		await admin.app().delete();
 		scope.done();
 		nock.cleanAll();
-	});
+	} );
 
-	it('fcmSendMessage', async () => {
-		app.metrics = sinon.spy(makeMetrics([{
+	it( 'fcmSendMessage', async () => {
+		app.metrics = sinon.spy( makeMetrics( [ {
 			type: 'prometheus',
 			port: 9000,
 			name: 'test'
-		}], logger));
-		const multicastMessage = getMulticastMessage(new MultiDeviceMessage(
-			new Set(['TOKEN']),
+		} ], logger ) );
+		const multicastMessage = getMulticastMessage( new MultiDeviceMessage(
+			new Set( [ 'TOKEN' ] ),
 			PushProvider.FCM,
 			MessageType.CheckEchoV1,
 			{},
 			true
-		));
-		await sendMessage(app, multicastMessage);
-	});
-});
+		) );
+		await sendMessage( app, multicastMessage );
+	} );
+} );
