@@ -4,7 +4,7 @@ const express = require( 'express' );
 const BBPromise = require( 'bluebird' );
 const fs = BBPromise.promisifyAll( require( 'fs' ) );
 const yaml = require( 'js-yaml' );
-const ProxyAgent = require( 'proxy-agent' );
+const ProxyAgent = require( 'proxy-agent' ).ProxyAgent;
 const sUtil = require( '../lib/routing' );
 const apiUtil = require( '../lib/api-util' );
 
