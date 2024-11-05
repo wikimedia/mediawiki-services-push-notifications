@@ -60,7 +60,7 @@
     "domino": "^2.1.6",
     "express": "^4.19.2",
     "express-rate-limit": "^7.3.1",
-    "firebase-admin": "^12.1.1",
+    "firebase-admin": "^12.7.0",
     "http-shutdown": "^1.2.2",
     "js-yaml": "^4.1.0",
     "preq": "^0.5.14",

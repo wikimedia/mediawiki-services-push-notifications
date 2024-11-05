@@ -33,11 +33,17 @@ export async function sendMessage( app: Application, message: MulticastMessage, 
 	let response: BatchResponse;
 
 	try {
-		response = await admin.messaging().sendMulticast( message, dryRun );
+		response = await admin.messaging().sendEachForMulticast( message, dryRun );
 	} catch ( err ) {
 		fcmFailureMetric.increment( message.tokens.length );
 		throw err;
 	}
+
+	response.responses.forEach( ( rsp ) => {
+		if ( !rsp.success ) {
+			app.logger.log( 'error/fcm', `Failed to send message: ${ rsp.error.code } - ${ rsp.error.message }` );
+		}
+	} );
 
 	app.logger.log( 'debug/fcm', `Successfully sent ${ response.successCount } messages; ` +
         `${ response.failureCount } messages failed` );

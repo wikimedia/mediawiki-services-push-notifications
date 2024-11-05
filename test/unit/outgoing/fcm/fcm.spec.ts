@@ -33,8 +33,10 @@ describe( 'unit:FCM', () => {
 			await admin.app().delete();
 		}
 		admin.initializeApp( { credential: admin.credential.applicationDefault(), projectId: 'fir-test' } );
+		// Make the service use HTTP/1.1 instead of HTTP/2, since nock doesn't support it.
+		admin.messaging().enableLegacyHttpTransport();
 		scope = nock( 'https://fcm.googleapis.com' )
-			.post( '/batch' )
+			.post( '/v1/projects/fir-test/messages:send' )
 			.reply( 200, createMultipartPayload(), {
 				'Content-type': 'multipart/mixed; boundary=boundary'
 			} );
