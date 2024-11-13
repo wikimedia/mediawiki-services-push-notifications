@@ -15,6 +15,7 @@ export function init( app: Application ): void {
 			credential: admin.credential.applicationDefault( httpAgent ),
 			httpAgent
 		} );
+		admin.messaging().enableLegacyHttpTransport();
 	}
 }
 
