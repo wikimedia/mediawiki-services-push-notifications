@@ -6,8 +6,6 @@ const requestLib = require( 'request' );
 const sUtil = require( './routing' );
 const Template = require( 'swagger-router' ).Template;
 const HTTPError = sUtil.HTTPError;
-// Debug requests for badtoken issues in beta/prod (T260247)
-requestLib.debug = true;
 
 const TokenType = {
 	CSRF: 'csrf',
