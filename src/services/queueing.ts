@@ -201,7 +201,6 @@ export function init( app: any ): Queue {
 		} ) ).then( ( results ) => {
 			const failures = results.filter( ( result ) => result.status === 'rejected' );
 			failures.forEach( ( failure ) => {
-				// @ts-expect-error PromiseSettledResult type not inferred, 'reason' exists
 				app.logger.log( 'debug', failure.reason );
 			} );
 		} );
