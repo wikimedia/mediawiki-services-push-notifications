@@ -3,7 +3,6 @@
 .vscode/
 
 coverage/
-.nyc_output
 /config.yaml
 /dist/
 node_modules/

@@ -1,5 +1,5 @@
 version: v4
-base: docker-registry.wikimedia.org/nodejs20-slim
+base: docker-registry.wikimedia.org/nodejs24-slim
 lives:
   in: /srv/service
 runs:
@@ -7,7 +7,7 @@ runs:
 
 variants:
   all-dependencies:
-    base: docker-registry.wikimedia.org/nodejs20-slim
+    base: docker-registry.wikimedia.org/nodejs24-slim
     copies: [local]
     apt: { packages: [git, build-essential, python3, pkg-config] }
     node: { requirements: [package.json, package-lock.json] }
@@ -33,7 +33,7 @@ variants:
         destination: /srv/service/dist
     node: { env: production }
   production:
-    base: docker-registry.wikimedia.org/nodejs20-slim
+    base: docker-registry.wikimedia.org/nodejs24-slim
     node: { requirements: [] }
     includes: [prep]
     apt: { packages: [ca-certificates] }

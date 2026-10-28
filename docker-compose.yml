@@ -1,7 +1,7 @@
 services:
 ### push-notifications ##################################
   push-notifications:
-    image: node:12-slim
+    image: node:24-slim
     # On Linux, these lines ensure file ownership is set to your host user/group
     user: "${MW_DOCKER_UID}:${MW_DOCKER_GID}"
     volumes:
